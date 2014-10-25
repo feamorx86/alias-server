@@ -1,0 +1,225 @@
+2014-09-26 00:41:58,086 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 00:41:58,087 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 00:41:58,087 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 00:41:58,089 INFO  [main] ? (:) - ApplicationConfig
+2014-09-26 00:41:58,137 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 00:41:58,137 INFO  [main] ? (:) - Server: Launch!
+2014-09-26 00:42:57,467 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 00:42:57,502 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 00:42:57,502 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 00:42:57,504 INFO  [main] ? (:) - ApplicationConfig
+2014-09-26 00:42:57,523 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 00:42:57,523 INFO  [main] ? (:) - Server: Launch!
+2014-09-26 00:44:47,242 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:44:47,242 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 00:44:47,242 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:44:47,242 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 00:44:47,243 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 00:44:47,243 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 00:44:47,245 INFO  [main] ? (:) - ApplicationConfig
+2014-09-26 00:44:47,258 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 00:44:47,258 INFO  [main] ? (:) - Server: Launch!
+2014-09-26 00:45:49,203 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:45:49,228 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 00:45:49,228 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:45:49,228 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 00:45:49,242 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 00:45:49,242 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 00:45:49,244 INFO  [main] ? (:) - ApplicationConfig
+2014-09-26 00:46:03,111 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:46:11,321 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:47:28,049 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:47:28,050 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 00:47:28,051 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:47:28,051 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 00:47:28,052 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 00:47:28,052 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 00:47:28,054 INFO  [main] ? (:) - ApplicationConfig
+2014-09-26 00:47:28,070 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:47:28,071 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:48:16,507 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:48:16,509 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 00:48:16,510 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:48:16,510 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 00:48:16,535 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 00:48:16,535 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 00:48:16,538 INFO  [main] ? (:) - ApplicationConfig
+2014-09-26 00:48:17,679 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:48:19,404 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:49:27,809 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:49:27,810 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 00:49:27,810 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:49:27,810 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 00:49:27,833 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 00:49:27,833 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 00:49:27,836 INFO  [main] ? (:) - ApplicationConfig
+2014-09-26 00:49:29,416 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:49:30,678 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:50:28,724 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:50:28,725 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 00:50:28,726 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:50:28,726 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 00:50:28,727 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 00:50:28,727 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 00:50:28,730 INFO  [main] ? (:) - ApplicationConfig
+2014-09-26 00:50:28,749 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:50:28,749 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:52:10,812 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:52:10,812 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 00:52:10,812 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 00:52:10,812 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 00:52:10,815 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 00:52:10,815 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 00:52:10,816 INFO  [main] ? (:) - ApplicationConfig
+2014-09-26 00:52:10,845 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:52:10,845 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:52:10,845 ERROR [main] ? (:) - ComponentManager
+java.lang.InstantiationException: ru.feamor.aliasserver.core.Compenent
+	at java.lang.Class.newInstance(Unknown Source) ~[?:1.7.0_51]
+	at ru.feamor.aliasserver.core.ComponentManager.constructComponent(ComponentManager.java:70) [bin/:?]
+	at ru.feamor.aliasserver.core.ComponentManager.configure(ComponentManager.java:54) [bin/:?]
+	at ru.feamor.aliasserver.Application.config(Application.java:27) [bin/:?]
+	at ru.feamor.aliasserver.Application.main(Application.java:43) [bin/:?]
+2014-09-26 00:52:10,868 ERROR [main] ? (:) - ComponentManager
+java.lang.InstantiationException: ru.feamor.aliasserver.core.Compenent
+	at java.lang.Class.newInstance(Unknown Source) ~[?:1.7.0_51]
+	at ru.feamor.aliasserver.core.ComponentManager.constructComponent(ComponentManager.java:70) [bin/:?]
+	at ru.feamor.aliasserver.core.ComponentManager.configure(ComponentManager.java:54) [bin/:?]
+	at ru.feamor.aliasserver.Application.config(Application.java:27) [bin/:?]
+	at ru.feamor.aliasserver.Application.main(Application.java:43) [bin/:?]
+2014-09-26 00:52:10,868 ERROR [main] ? (:) - ComponentManager
+2014-09-26 00:52:10,868 INFO  [main] ? (:) - ComponentManager
+2014-09-26 00:52:10,869 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 00:52:10,869 INFO  [main] ? (:) - Server: Launch!
+2014-09-26 01:02:55,788 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:02:55,789 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 01:02:55,789 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:02:55,789 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 01:02:55,792 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 01:02:55,792 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 01:02:55,793 INFO  [main] ? (:) - CLASS ApplicationConfig TAG use configuration: ./config/config.json
+2014-09-26 01:02:55,809 INFO  [main] ? (:) - CLASS ComponentManager TAG Start compomemts configuration
+2014-09-26 01:02:55,809 INFO  [main] ? (:) - CLASS ComponentManager TAG Use next components:
+2014-09-26 01:02:55,809 ERROR [main] ? (:) - CLASS ComponentManager TAG Fail to construct component, alias = db
+java.lang.InstantiationException: ru.feamor.aliasserver.core.Compenent
+	at java.lang.Class.newInstance(Unknown Source) ~[?:1.7.0_51]
+	at ru.feamor.aliasserver.core.ComponentManager.constructComponent(ComponentManager.java:70) [bin/:?]
+	at ru.feamor.aliasserver.core.ComponentManager.configure(ComponentManager.java:54) [bin/:?]
+	at ru.feamor.aliasserver.Application.config(Application.java:27) [bin/:?]
+	at ru.feamor.aliasserver.Application.main(Application.java:43) [bin/:?]
+2014-09-26 01:02:55,815 ERROR [main] ? (:) - CLASS ComponentManager TAG Fail to construct component, alias = netty
+java.lang.InstantiationException: ru.feamor.aliasserver.core.Compenent
+	at java.lang.Class.newInstance(Unknown Source) ~[?:1.7.0_51]
+	at ru.feamor.aliasserver.core.ComponentManager.constructComponent(ComponentManager.java:70) [bin/:?]
+	at ru.feamor.aliasserver.core.ComponentManager.configure(ComponentManager.java:54) [bin/:?]
+	at ru.feamor.aliasserver.Application.config(Application.java:27) [bin/:?]
+	at ru.feamor.aliasserver.Application.main(Application.java:43) [bin/:?]
+2014-09-26 01:02:55,815 ERROR [main] ? (:) - CLASS ComponentManager TAG incorrect alias = game
+2014-09-26 01:02:55,815 INFO  [main] ? (:) - CLASS ComponentManager TAG Adding complete. 0 components added!
+2014-09-26 01:02:55,815 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 01:02:55,815 INFO  [main] ? (:) - Server: Launch!
+2014-09-26 01:05:58,221 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:05:58,223 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 01:05:58,223 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:05:58,223 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 01:05:58,226 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 01:05:58,226 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 01:05:58,228 INFO  [main] ? (:) - CLASS ApplicationConfig TAG use configuration: ./config/config.json
+2014-09-26 01:05:58,245 INFO  [main] ? (:) - CLASS ComponentManager TAG Start compomemts configuration
+2014-09-26 01:05:58,246 INFO  [main] ? (:) - CLASS ComponentManager TAG Use next components:
+2014-09-26 01:05:58,246 INFO  [main] ? (:) - CLASS ComponentManager TAG Added component. Alias = db, class = Compenent
+2014-09-26 01:05:58,246 INFO  [main] ? (:) - CLASS ComponentManager TAG Added component. Alias = netty, class = Compenent
+2014-09-26 01:05:58,247 ERROR [main] ? (:) - CLASS ComponentManager TAG incorrect alias = game
+2014-09-26 01:05:58,247 INFO  [main] ? (:) - CLASS ComponentManager TAG Adding complete. 2 components added!
+2014-09-26 01:05:58,247 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 01:05:58,247 INFO  [main] ? (:) - Server: Launch!
+2014-09-26 01:06:54,167 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:06:54,167 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 01:06:54,167 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:06:54,167 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 01:06:54,182 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 01:06:54,182 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 01:06:54,184 INFO  [main] ? (:) - CLASS ApplicationConfig TAG use configuration: ./config/config.json
+2014-09-26 01:07:05,310 INFO  [main] ? (:) - CLASS ComponentManager TAG Start compomemts configuration
+2014-09-26 01:07:05,310 INFO  [main] ? (:) - CLASS ComponentManager TAG Use next components:
+2014-09-26 01:07:30,484 INFO  [main] ? (:) - CLASS ComponentManager TAG Added component. Alias = db, class = Compenent
+2014-09-26 01:07:33,166 INFO  [main] ? (:) - CLASS ComponentManager TAG Added component. Alias = netty, class = Compenent
+2014-09-26 01:07:33,166 ERROR [main] ? (:) - CLASS ComponentManager TAG incorrect alias = game
+2014-09-26 01:07:33,166 INFO  [main] ? (:) - CLASS ComponentManager TAG Adding complete. 2 components added!
+2014-09-26 01:07:33,166 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 01:07:33,166 INFO  [main] ? (:) - Server: Launch!
+2014-09-26 01:08:43,762 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:08:43,764 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 01:08:43,764 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:08:43,764 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 01:08:43,767 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 01:08:43,767 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 01:08:43,769 INFO  [main] ? (:) - CLASS ApplicationConfig MSGuse configuration: ./config/config.json
+2014-09-26 01:08:43,783 INFO  [main] ? (:) - CLASS ComponentManager MSGStart compomemts configuration
+2014-09-26 01:08:43,784 INFO  [main] ? (:) - CLASS ComponentManager MSGUse next components:
+2014-09-26 01:08:43,784 INFO  [main] ? (:) - CLASS ComponentManager MSGAdded component. Alias = db, class = Compenent
+2014-09-26 01:08:43,784 INFO  [main] ? (:) - CLASS ComponentManager MSGAdded component. Alias = netty, class = Compenent
+2014-09-26 01:08:43,784 ERROR [main] ? (:) - CLASS ComponentManager MSG incorrect alias = game
+2014-09-26 01:08:43,784 INFO  [main] ? (:) - CLASS ComponentManager MSGAdding complete. 2 components added!
+2014-09-26 01:08:43,785 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 01:08:43,785 INFO  [main] ? (:) - Server: Launch!
+2014-09-26 01:10:00,298 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:10:00,298 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 01:10:00,298 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:10:00,298 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 01:10:00,300 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 01:10:00,300 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 01:10:00,302 INFO  [main] ? (:) - CLASS  ApplicationConfig | MSG | use configuration: ./config/config.json
+2014-09-26 01:10:00,375 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Start compomemts configuration
+2014-09-26 01:10:00,376 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Use next components:
+2014-09-26 01:10:00,377 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Added component. Alias = db, class = Compenent
+2014-09-26 01:10:00,377 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Added component. Alias = netty, class = Compenent
+2014-09-26 01:10:00,377 ERROR [main] ? (:) - CLASS ComponentManager | MSG | incorrect alias = game
+2014-09-26 01:10:00,377 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Adding complete. 2 components added!
+2014-09-26 01:10:00,377 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 01:10:00,377 INFO  [main] ? (:) - Server: Launch!
+2014-09-26 01:10:49,079 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:10:49,080 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 01:10:49,080 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:10:49,080 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 01:10:49,082 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 01:10:49,082 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 01:10:49,083 INFO  [main] ? (:) - CLASS  ApplicationConfig | MSG | use configuration: ./config/config.json
+2014-09-26 01:10:49,096 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Start compomemts configuration
+2014-09-26 01:10:49,096 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Use next components:
+2014-09-26 01:10:49,096 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Added component. Alias = `db`, class = Compenent
+2014-09-26 01:10:49,096 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Added component. Alias = `netty`, class = Compenent
+2014-09-26 01:10:49,096 ERROR [main] ? (:) - CLASS ComponentManager | MSG | incorrect alias = game
+2014-09-26 01:10:49,096 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Adding complete. 2 components added!
+2014-09-26 01:10:49,096 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 01:10:49,097 INFO  [main] ? (:) - Server: Launch!
+2014-09-26 01:11:23,903 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:11:23,905 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 01:11:23,905 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:11:23,905 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 01:11:23,907 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 01:11:23,907 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 01:11:23,909 INFO  [main] ? (:) - CLASS  ApplicationConfig | MSG | use configuration: ./config/config.json
+2014-09-26 01:11:23,924 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Start compomemts configuration
+2014-09-26 01:11:23,925 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Use next components:
+2014-09-26 01:11:23,925 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Added component. Alias = `db`, class = Compenent
+2014-09-26 01:11:23,925 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Added component. Alias = `netty`, class = Compenent
+2014-09-26 01:11:23,925 ERROR [main] ? (:) - CLASS ComponentManager | MSG | incorrect alias = `game`
+2014-09-26 01:11:23,925 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Adding complete. 2 components added!
+2014-09-26 01:11:23,925 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 01:11:23,925 INFO  [main] ? (:) - Server: Launch!
+2014-09-26 01:15:16,811 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:15:16,811 INFO  [main] ? (:) - ----------------         ALIAS       SERVER            --------------
+2014-09-26 01:15:16,811 INFO  [main] ? (:) - ---------------------------------------------------------------------
+2014-09-26 01:15:16,811 INFO  [main] ? (:) - Server: Begin initialization
+2014-09-26 01:15:16,814 INFO  [main] ? (:) - Server: Initialization complete
+2014-09-26 01:15:16,814 INFO  [main] ? (:) - Server: begin configuration
+2014-09-26 01:15:16,816 INFO  [main] ? (:) - CLASS  ApplicationConfig | MSG | use configuration: ./config/config.json
+2014-09-26 01:15:16,837 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Start compomemts configuration
+2014-09-26 01:15:16,837 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Use next components:
+2014-09-26 01:15:16,839 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Added component. Alias = `db`, class = DBManager
+2014-09-26 01:15:16,839 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Added component. Alias = `netty`, class = NettyManager
+2014-09-26 01:15:16,839 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Added component. Alias = `game`, class = GameManageer
+2014-09-26 01:15:16,839 INFO  [main] ? (:) - CLASS  ComponentManager | MSG | Adding complete. 3 components added!
+2014-09-26 01:15:16,839 INFO  [main] ? (:) - Server: Configuration complete
+2014-09-26 01:15:16,839 INFO  [main] ? (:) - Server: Launch!
