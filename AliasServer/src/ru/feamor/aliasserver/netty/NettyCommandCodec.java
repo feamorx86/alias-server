@@ -21,7 +21,7 @@ public class NettyCommandCodec extends io.netty.handler.codec.ByteToMessageCodec
 			ByteBuf out) throws Exception {
 		out.writeByte(msg.getType());
 		out.writeShort(msg.getId());
-		out.writeInt(msg.getLength());
+		out.writeInt(msg.getDataLength());
 		out.writeBytes(msg.getData());
 		msg.recycle();
 	}
@@ -37,7 +37,6 @@ public class NettyCommandCodec extends io.netty.handler.codec.ByteToMessageCodec
 		in.readBytes(data, length);
 		command.setType(type);
 		command.setId(id);
-		command.setLength(length);
 		command.setData(data);
 		out.add(command);
 	}

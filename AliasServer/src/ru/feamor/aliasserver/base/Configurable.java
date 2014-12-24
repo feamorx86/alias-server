@@ -1,4 +1,4 @@
-package ru.feamor.aliasserver.config;
+package ru.feamor.aliasserver.base;
 
 import org.json.JSONObject;
 

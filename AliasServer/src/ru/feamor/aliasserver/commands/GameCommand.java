@@ -11,12 +11,11 @@ public class GameCommand {
 	 * Maximum size of command : 100k bytes
 	 */
 	public static final int MAX_COMMAND_SIZE = 1024 * 100; 
-	public static final int LENGTH_OFFSET = Byte.SIZE + Short.SIZE;
-	public static final int HEADER_SIZE = Byte.SIZE + Short.SIZE + Integer.SIZE;
+	public static final int LENGTH_OFFSET = 1 + 2;
+	public static final int HEADER_SIZE = 1 + 2 + 4;
 	
 	private byte type;
 	private short id;
-	private int length;
 	private ByteBuf data;
 	private long receiveTime;
 	private DoubleLinkedListNode commandNode;
@@ -24,14 +23,12 @@ public class GameCommand {
 	public GameCommand() {
 		type = CommandTypes.UNKNOWN.TYPE;
 		id = CommandTypes.UNKNOWN.UNKNOWN;
-		length = 0;
 		data = null;
 	}
 	
 	public GameCommand(byte type, short id) {
 		this.type = type;
 		this.id = id;
-		length = 0;
 		data = null;
 	}
 	
@@ -40,18 +37,14 @@ public class GameCommand {
 		return id;
 	}
 	
-	public int getLength() {
-		return length;
+	public int getDataLength() {
+		int lenght = 0;
+		if (data!=null) {
+			lenght = data.readableBytes();
+		}
+		return lenght;
 	}
-	
-	 
-	
-	public int getFullLength() {
-		int staticLength = HEADER_SIZE; 
-		int dataLength = getLength();
-		return staticLength + dataLength;
-	}
-	
+		
 	public byte getType() {
 		return type;
 	}
@@ -59,11 +52,7 @@ public class GameCommand {
 	public void setId(short id) {
 		this.id = id;
 	}
-	
-	public void setLength(int length) {
-		this.length = length;
-	}
-	
+		
 	public void setType(byte type) {
 		this.type = type;
 	}

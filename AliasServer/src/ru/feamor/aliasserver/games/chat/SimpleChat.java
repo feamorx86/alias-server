@@ -69,7 +69,6 @@ public class SimpleChat extends BaseGame {
 				inPlayer.getConnection().sendCommand(command.retain());
 			}
 		}
-		command.recycle();
 	}
 	
 	@Override
@@ -182,14 +181,7 @@ public class SimpleChat extends BaseGame {
 				break;
 		}
 	}
-	
-	private GameCommand createCommand(short commandId) {
-		GameCommand command = new GameCommand(getTypeId(), commandId);
-		ByteBuf buf = NettyManager.get().getCommandAllocator().buffer();
-		command.setData(buf);
-		return command;
-	}
-	
+			
 	private void sendMessage(String message, GameClient toPlayer, GameClient fromPlayer) {
 		GameCommand command = createCommand(CommandTypes.SIMPLE_CHAT.SEND_MESSAGE_TO);
 		//SENDER ID

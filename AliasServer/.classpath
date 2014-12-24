@@ -13,8 +13,11 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/AliasServer/libs/commons/commons-configuration-1.10-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="libs/commons/commons-dbcp2-2.0.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/commons/commons-dbutils-1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/commons/commons-dbutils-1.6.jar" sourcepath="libs/commons/commons-dbutils-1.6-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/AliasServer/libs/commons/commons-dbutils-1.6-sources.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="libs/commons/commons-io-2.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/commons/commons-logging-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/commons/commons-primitives-1.0.jar"/>
@@ -26,5 +29,19 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/AliasServer/libs/netty-all-4.0.23.Final-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="libs/postgresql-9.3-1102.jdbc41.jar"/>
+	<classpathentry kind="lib" path="libs/trove-3.1a1.jar"/>
+	<classpathentry kind="lib" path="libs/commons/commons-pool2-2.2.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/AliasServer/libs/commons/commons-pool2-2.2-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/commons/commons-lang3-3.3.2.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/AliasServer/libs/commons/commons-lang3-3.3.2-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/c3p0-0.9.5-pre10.jar"/>
+	<classpathentry kind="lib" path="libs/mchange-commons-java-0.2.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

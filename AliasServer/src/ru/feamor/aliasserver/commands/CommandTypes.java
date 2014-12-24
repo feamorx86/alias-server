@@ -17,7 +17,31 @@ public class CommandTypes {
 
 	public static class NEW_PLAYER {
 		public static final byte TYPE					= 2;
-		public static final short START_GAME 					= 0;
+		public static final short VERSION	 					= 1;
+		public static final short AUTHORIZE 					= 2;
+		public static final short REGISTER	 					= 3;
+		public static final short ACTION_TIMEOUT				= 4;
+		public static final short INVALID_COMMAND				= 5;
+		
+		public static class P_AUTH {
+			public static final int AUTH_TYPE_INVALID = 0;
+			public static final int AUTH_TYPE_LOGIN_AND_PASSWORD = 1;
+			public static final int AUTH_TYPE_COOKIE = 2;
+			public static final int AUTH_TYPE_VKONTAKTE_ID = 3;
+			public static final int AUTH_TYPE_FACEBOOK_ID = 4;
+			
+			public static final int AUTH_RESULT_SUCCESS = 0;
+			public static final int AUTH_RESULT_FAIL = 1;	
+			public static final int AUTH_RESULT_ERROR = 2;
+			
+			public static final int AUTH_ERROR_INCORRECT_MESSAGE_FORMAT = 0;
+			public static final int AUTH_ERROR_INCORRECT_AUTHORIZATION_TYPE= 1;
+			public static final int AUTH_ERROR_INCORRECT_AUTHORIZATION_DATA= 2;
+			
+			public static final byte VERSION_LAST = 0;
+			public static final byte VERSION_CAN_UPDATED = 1;
+			public static final byte VERSION_NOT_SUPPORTED = 2;
+		}
 	}
 	
 	public static class SIMPLE_CHAT {

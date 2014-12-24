@@ -1,14 +1,14 @@
 package ru.feamor.aliasserver;
 
 import ru.feamor.aliasserver.components.Components;
-import ru.feamor.aliasserver.config.ApplicationConfig;
 import ru.feamor.aliasserver.config.ConfigurationFactory;
 import ru.feamor.aliasserver.core.ComponentManager;
 import ru.feamor.aliasserver.core.StaticInitialization;
 import ru.feamor.aliasserver.utils.Log;
 
 public class Application {
-	
+	public static final int version = 1;
+	public static final int clientVersion = 1;
 	public static final String CONFIG_PATH = "./config/config.json";
 	public ApplicationConfig config;
 	//TODO: getInstance()

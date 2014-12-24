@@ -4,8 +4,8 @@ import java.util.HashMap;
 
 import org.json.JSONObject;
 
-import ru.feamor.aliasserver.config.Config;
-import ru.feamor.aliasserver.config.Configurable;
+import ru.feamor.aliasserver.base.Config;
+import ru.feamor.aliasserver.base.Configurable;
 import ru.feamor.aliasserver.config.ConfigurationFactory;
 import ru.feamor.aliasserver.config.GameTypeCollectorConfig;
 import ru.feamor.aliasserver.game.GamePlayer;

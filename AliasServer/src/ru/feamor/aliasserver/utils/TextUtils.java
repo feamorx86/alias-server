@@ -28,7 +28,7 @@ public class TextUtils {
 		if (length > 0) {
 			byte [] data = new byte[length];
 			in.readBytes(data, 0, length);
-			String result =  String.valueOf(data);
+			String result =  new String(data);
 			return result;
 		} else {
 			return "";

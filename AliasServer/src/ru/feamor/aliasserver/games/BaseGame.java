@@ -1,10 +1,16 @@
 package ru.feamor.aliasserver.games;
 
+import io.netty.buffer.ByteBuf;
+
+import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 import org.json.JSONObject;
 
+import ru.feamor.aliasserver.commands.GameCommand;
 import ru.feamor.aliasserver.components.GameManager;
+import ru.feamor.aliasserver.components.NettyManager;
 import ru.feamor.aliasserver.components.GameManager.Executed;
 import ru.feamor.aliasserver.game.GameClient;
+import ru.feamor.aliasserver.game.GameType;
 
 public abstract class BaseGame {
 	/***
@@ -19,21 +25,40 @@ public abstract class BaseGame {
 	private GameManager.Executed executed;
 	private long config_maxExecuteTimeout;
 	
+	private int id;
+	
+	protected GameType gameType;
+	
 	public synchronized void askStop() {
 		needStop = true;
+	}
+	
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	public synchronized boolean isNeedStop() {
 		return needStop;
 	}
 	
+	public void setGameType(GameType gameType) {
+		this.gameType = gameType;
+	}
+	
+	public GameType getGameType() {
+		return gameType;
+	}
+	
 	protected void update() {
 		
 	}
 	
-	public void config(JSONObject config) {
-		config_maxExecuteTimeout = config.optLong("maxExecuteTime", DEFAULT_MAX_EXECUTE_TIME);
-	}
+//	public void config(JSONObject config) {
+//		config_maxExecuteTimeout = config.optLong("maxExecuteTime", DEFAULT_MAX_EXECUTE_TIME);
+//	}
 	
 	public void start() {
 		executed = new GameManager.Executed();
@@ -57,6 +82,13 @@ public abstract class BaseGame {
 		
 	}
 	
+	protected GameCommand createCommand(short commandId) {
+		GameCommand command = new GameCommand(getTypeId(), commandId);
+		ByteBuf buf = NettyManager.get().getCommandAllocator().buffer();
+		command.setData(buf);
+		return command;
+	}
+	
 	public void onStop() {
 		
 	}
@@ -75,7 +107,17 @@ public abstract class BaseGame {
 		return updateRunnable;
 	}
 	
+	public void doUpdate() {
+		getUpdate().run();
+	}
+	
 	public void onStarted() {
 		
+	}
+	
+	protected DoubleLinkedListNode myUpdateNode = new DoubleLinkedListNode(this);
+	
+	public DoubleLinkedListNode getMyUpdateNode() {
+		return myUpdateNode;
 	}
 }

@@ -2,7 +2,7 @@ package ru.feamor.aliasserver.core;
 
 import org.json.JSONObject;
 
-import ru.feamor.aliasserver.config.Config;
+import ru.feamor.aliasserver.base.Config;
 import ru.feamor.aliasserver.config.ConfigurationFactory;
 
 public class Component {

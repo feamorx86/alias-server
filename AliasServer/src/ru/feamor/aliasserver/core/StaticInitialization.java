@@ -12,6 +12,7 @@ public class StaticInitialization {
 	private Log _log;
 		
 	public StaticInitialization() {
+		Log.initialize("config/log4j.xml");
 		System.out.flush();//do nothing!
 	}
 }

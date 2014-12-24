@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import ru.feamor.aliasserver.Application;
 import ru.feamor.aliasserver.components.Components;
 import ru.feamor.aliasserver.utils.Log;
 
@@ -14,6 +15,9 @@ public class ComponentManager  {
 	
 	private HashMap<Integer, Component> components;
 	
+	private int serverVersion = Application.version;
+	private int minClientVersion = Application.clientVersion;
+	private int maxClientVersion = Application.clientVersion;
 	
 	private ComponentManager() {
 		components = new HashMap<>();
@@ -43,6 +47,15 @@ public class ComponentManager  {
 	
 	public void configure(JSONObject config) {
 		Log.i(ComponentManager.class, "Start compomemts configuration");
+		JSONObject versionJson = config.optJSONObject("version");
+		if (versionJson != null) {
+			serverVersion = versionJson.optInt("server", Application.version);
+			minClientVersion = versionJson.optInt("minClient", Application.clientVersion);
+			maxClientVersion = versionJson.optInt("maxClient", Application.clientVersion);	
+		} else {
+			Log.i(ComponentManager.class, "No version in config, use default.");
+		}
+		Log.i(ComponentManager.class, "VERSION: server"+serverVersion+". Supported clients: [ "+minClientVersion+" ... "+maxClientVersion+" ].");
 		JSONArray usedComponents = config.getJSONArray("components");
 		Log.i(ComponentManager.class, "Use next components:");
 		if (usedComponents != null) {
@@ -154,5 +167,28 @@ public class ComponentManager  {
 			component = null;
 		}
 		return component;
+	}
+	
+	public int serverVersion() {
+		return serverVersion;
+	}
+	
+	public int minClientVersion() {
+		return minClientVersion;
+	}
+	
+	public int maxClientVersion() {
+		return maxClientVersion;
+	}
+	
+	public boolean checkClientVersionSupported(int clientVersion) {
+		boolean result = ((clientVersion >= minClientVersion) && (clientVersion <= maxClientVersion));
+		return result;
+	}
+	
+	public boolean cliendCanUpdate(int clientVersion) {
+		//if not as max - than can update
+		boolean result = clientVersion != maxClientVersion; 
+		return result;
 	}
 }

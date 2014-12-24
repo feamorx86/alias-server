@@ -1,4 +1,4 @@
-package ru.feamor.aliasserver.config;
+package ru.feamor.aliasserver;
 
 import java.io.File;
 import java.io.IOException;

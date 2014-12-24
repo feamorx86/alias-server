@@ -33,4 +33,14 @@ public class GameCommandHolder {
 	public DoubleLinkedList getCommands() {
 		return commands;
 	}
+	
+	public GameCommand pop() {
+		DoubleLinkedListNode node = commands.getFirst();
+		GameCommand command = null;
+		if (node!=null) {
+			command = (GameCommand) node.getPayload();
+			commands.remove(node);
+		}
+		return command;
+	}
 }
