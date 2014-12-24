@@ -3,8 +3,11 @@ package ru.feamor.aliasserver.config;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import ru.feamor.aliasserver.base.Config;
 import ru.feamor.aliasserver.components.GameManager;
+import ru.feamor.aliasserver.game.types.AuthorizationGameType;
 import ru.feamor.aliasserver.game.types.GameTypeCollector;
+import ru.feamor.aliasserver.games.BaseGame;
 import ru.feamor.aliasserver.utils.Log;
 
 public class GameManagerConfig implements Config<GameManager> {
@@ -21,5 +24,8 @@ public class GameManagerConfig implements Config<GameManager> {
 		if (gameLogic!=null) {
 			gameManager.setConfig_maxGameLogicThreads(gameLogic.optInt("maxThreads", GameManager.DEFAULT_MAX_GAME_LOGIC_THREADS));
 		}
+		
+		gameManager.getGamesFactory().configure(config.optJSONObject("games"));
+		
 	}
 }

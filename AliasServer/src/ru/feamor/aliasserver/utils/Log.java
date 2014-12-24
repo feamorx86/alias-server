@@ -5,16 +5,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import org.apache.logging.log4j.core.LoggerContext;
 
 public class Log {
 	
-	private static final Logger logger;
+	private static Logger logger;
 	private static final Marker MSG_MARKER = MarkerManager.getMarker("MSG");
 	private static final Marker CLASS_MARKER = MarkerManager.getMarker("CLASS").setParents(MSG_MARKER);
-	
-	static {
-		//PropertyConfigurator.configure("./conf/log4j.properties");
-		org.apache.logging.log4j.core.config.Configurator.initialize("Log", "./config/log4j.properties");
+		
+	public static void initialize(String log4jConfigPath) {
+		org.apache.logging.log4j.core.config.Configurator.initialize("Log", log4jConfigPath);
 		logger = LogManager.getLogger("Log");
 	}
 	
@@ -23,7 +23,7 @@ public class Log {
 	}
 	
 	public static void i(String tag, String info) {
-		logger.info(MSG_MARKER, "| MSG | {}", info);
+		logger.info(CLASS_MARKER, "CLASS  {} | MSG | {}", tag, info);
 	}
 	
 	public static void i(Class clazz, String info) {
@@ -35,7 +35,7 @@ public class Log {
 	}
 	
 	public static void e(String tag, String error) {
-		logger.error(MSG_MARKER, "| MSG | {}", error);
+		logger.error(CLASS_MARKER, "CLASS {} | MSG | {}", tag, error);
 	}
 	
 	public static void e(Class clazz, String error) {

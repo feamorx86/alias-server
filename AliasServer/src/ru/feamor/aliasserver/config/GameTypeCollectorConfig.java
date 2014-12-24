@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import ru.feamor.aliasserver.base.Config;
 import ru.feamor.aliasserver.game.assignment.GamePlayersLevelAssignmentGroup;
 import ru.feamor.aliasserver.game.types.GameTypeCollector;
 import ru.feamor.aliasserver.utils.Log;
@@ -26,7 +27,7 @@ public class GameTypeCollectorConfig implements Config<GameTypeCollector> {
 	
 	@Override
 	public void configure(JSONObject config, GameTypeCollector typeCollector) {
-		JSONArray gameTypes =config.optJSONArray("gameTypes");
+		JSONArray gameTypes = config.optJSONArray("gameTypes");
 		int typesAdded = 0;
 		if (gameTypes == null || gameTypes.length() == 0) {
 			Log.e(GameTypeCollectorConfig.class, "There is no one game type!");

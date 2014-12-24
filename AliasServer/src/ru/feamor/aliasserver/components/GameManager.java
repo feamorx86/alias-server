@@ -1,5 +1,6 @@
 package ru.feamor.aliasserver.components;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.Future;
 
@@ -7,15 +8,20 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.logging.LogFactory;
 import org.apache.jcs.utils.struct.DoubleLinkedList;
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 import org.apache.logging.log4j.core.util.KeyValuePair;
+import org.json.JSONObject;
 
 import ru.feamor.aliasserver.core.Component;
 import ru.feamor.aliasserver.game.GameClient;
 import ru.feamor.aliasserver.game.GameTags;
+import ru.feamor.aliasserver.game.types.AuthorizationGameType;
 import ru.feamor.aliasserver.game.types.GameTypeCollector;
+import ru.feamor.aliasserver.games.Authorizator;
 import ru.feamor.aliasserver.games.BaseGame;
+import ru.feamor.aliasserver.netty.NettyClient;
 import ru.feamor.aliasserver.utils.Log;
 
 public class GameManager extends Component  {
@@ -24,31 +30,42 @@ public class GameManager extends Component  {
 	
 	private GameTypeCollector typeController;	
 	
-	private DoubleLinkedList authorizedPlayers;
-	private DoubleLinkedList newPlayers;
-	
-	private HashMap<Integer, BaseGame> activeGames;
+	private TIntObjectHashMap<BaseGame> activeGames;
 	private DefaultEventExecutorGroup gameLogicEventLoop;
 	private int config_maxGameLogicThreads = DEFAULT_MAX_GAME_LOGIC_THREADS;
-	private Object playersLocker = new Object();
 	private Thread managerThread;
+	private Authorizator authorizator;
+	private DoubleLinkedList playersPoll = new DoubleLinkedList();
+	private GamesFactory gamesFactory = new GamesFactory();
 	
 	public GameManager() {
-		
+	
+	}
+	
+	public static GameManager get() {
+		return (GameManager)Components.gameManager.compenent;
 	}
 	
 	@Override
 	public void create() {
 		super.create();
+		gamesFactory = new GamesFactory();
 		typeController = new GameTypeCollector();
-		authorizedPlayers = new DoubleLinkedList();
-		newPlayers = new DoubleLinkedList();
-		activeGames = new HashMap<Integer, BaseGame>();
+		activeGames = new TIntObjectHashMap<BaseGame>();
 	}
 	
 	private boolean running = false;
 	public synchronized boolean isRunning() {
 		return running;
+	}
+	
+	@Override
+	public void config(JSONObject config) {
+		super.config(config);
+		authorizator = (Authorizator) gamesFactory.createGame(AuthorizationGameType.TYPE_ID);
+		if (authorizator == null) {			
+			throw new RuntimeException("Fail to start: Authorization == null");
+		}
 	}
 	
 	@Override
@@ -62,6 +79,7 @@ public class GameManager extends Component  {
 				synchronized(GameManager.this) {
 					running = true;
 				}
+				authorizator.start();
 				updateLoop();
 				synchronized(GameManager.this) {
 					running = false;
@@ -69,6 +87,14 @@ public class GameManager extends Component  {
 			}
 		}, "GameManagerThread");
 		managerThread.start();
+	}
+	
+	public Authorizator getAuthorizator() {
+		return authorizator;
+	}
+	
+	public GamesFactory getGamesFactory() {
+		return gamesFactory;
 	}
 	
 	private void updateLoop() {
@@ -95,21 +121,22 @@ public class GameManager extends Component  {
 		managerThread.interrupt();
 	}
 	
-	public void addNewPlayer(GameClient gameClient) {
-		synchronized (playersLocker) {
-			DoubleLinkedListNode clientNode = new DoubleLinkedListNode(gameClient);
-			gameClient.putTag(GameTags.TAG_GAME_CLIENT_NEW_PLAYER_NODE, clientNode);
-			newPlayers.addLast(clientNode);	
-		}		
+	public void addNewPlayer(NettyClient gameClient) {
+		authorizator.onNewConnection(gameClient);
 	}
 	
-	public void updateNewPlayers() {
-		//update disconnected users
-		//update timeout of users
-		//add new users
-		//check user commands
-			//process authorization
-			//move user to authorized poll
+	public void updateNewPlayers() {		
+		authorizator.doUpdate();
+		synchronized (authorizator.getAuthorizedPlayersLocker()) {
+			DoubleLinkedList list = authorizator.getAuthorizedPlayers();
+			for (DoubleLinkedListNode i = list.getFirst(); i!=null; i=i.next) {
+				GameClient client = (GameClient) i.getPayload();
+				DoubleLinkedListNode node = new DoubleLinkedListNode(client);
+				client.putTag(GameTags.TAG_GAME_PLAYER_POLL_NODE, node);
+				playersPoll.addLast(node);
+			}
+			list.removeAll();
+		}
 	}
 	
 	public void updateUserPoll() {
@@ -290,4 +317,43 @@ public class GameManager extends Component  {
 			return start;
 		}
 	}
+	
+	private static int lastGameId = 0;
+	
+	private synchronized int generateGameId() {
+		int result = 0;
+		boolean found = false;
+		int iteration = Integer.MIN_VALUE;
+		while (!found) {
+			if (lastGameId + 1 >= Integer.MAX_VALUE) {
+				lastGameId = Integer.MIN_VALUE;
+			}
+			
+			if (!activeGames.contains(lastGameId)) {
+				found = true;
+				result = lastGameId;
+			} else {
+				iteration++;
+				if (iteration+1 >=Integer.MAX_VALUE) {
+					Log.e(GameManager.class, "WTF!!!!!  ончились идентификаторы дл€ игр Ѕл€€€€! »гр больше 4 млрд!!");
+					found = true;
+				}
+			}
+			
+		}
+		
+		return result;
+	}
+
+	public BaseGame startGame(int typeId) {
+		BaseGame game = gamesFactory.createGame(typeId);
+		if (game != null) {
+			int gameId = generateGameId();
+			game.setId(gameId);
+			activeGames.put(gameId, game);
+			game.onStarted();
+		}
+		return game;
+	}
 }
+ 

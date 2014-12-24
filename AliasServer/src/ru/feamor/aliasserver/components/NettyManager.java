@@ -20,6 +20,7 @@ public class NettyManager extends Component  {
 	private EventLoopGroup acceptEventLoopGroup;
 	private EventLoopGroup clientEventLoopGroup;
 	private ServerBootstrap bootstrap;
+	private ByteBufAllocator commandAllocator;
 	
 	public static NettyManager get() {
 		return (NettyManager)Components.nettyManager.compenent;
@@ -46,7 +47,7 @@ public class NettyManager extends Component  {
 			bootstrap.childHandler(new NettyChannelInitializer(NettyManager.this));
 			bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
 		} catch(Throwable e) {
-			
+			//TODO: add catching errors
 		}
 	}
 	
@@ -106,8 +107,6 @@ public class NettyManager extends Component  {
 		this.config_Port = config_Port;
 	}
 	
-	io.netty.buffer.ByteBufAllocator commandAllocator;
-
 	public ByteBufAllocator getCommandAllocator() {
 		return commandAllocator;
 	}

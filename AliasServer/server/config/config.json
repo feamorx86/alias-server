@@ -1,3 +1,47 @@
 {
-	'components' : [ 'db', 'netty', 'game', 'time' ]
+	'components' : [ 'db', 'netty', 'game', 'time' ],
+	
+	'game' : {	
+		'gameLogic' : {
+			'maxThreads' : 5
+		},
+		
+		'gameTypes' : [
+			{
+				'name' : 'Level.simple'
+			}
+		],	
+		
+		'games' : {
+			'classification' : {
+				'id' : 0,
+				'name' : 'All',
+				'description' : 'All avalable games',
+				'types' : [ 1 ]
+								
+			},
+			
+			'types' : [
+				{
+					'alias' : 'authorization',
+					'id' : 1,
+					'timeToReceiveVersion' : 200000,
+					'timeToReceiveAuthorization' : 200000
+				}
+			]
+		}
+	},
+	
+	'netty' : {
+		'port' : 54651
+	},
+	
+	'db' : {
+		'connectionUrl' : 'jdbc:postgresql://localhost/activity',
+		'user' : 'server',
+		'password' : '123456',
+		'server' : 'localhost',
+		'db' : 'activity',
+		'maxDbConnections' : 5
+	}
 }

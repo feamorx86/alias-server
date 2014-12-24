@@ -20,7 +20,7 @@ public class Components {
 		dbManager = addCompomemt(DBManager.class, "db");
 		nettyManager = addCompomemt(NettyManager.class, "netty");
 		gameManager = addCompomemt(GameManager.class, "game");
-		timeManager = addCompomemt(GameManager.class, "time");
+		timeManager = addCompomemt(TimeManager.class, "time");
 	}
 			
 	public static ComponentDefine getDefine(int id) {

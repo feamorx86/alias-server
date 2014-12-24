@@ -4,7 +4,10 @@ import java.util.HashMap;
 
 import org.json.JSONObject;
 
+import ru.feamor.aliasserver.base.Config;
+import ru.feamor.aliasserver.components.DBManager;
 import ru.feamor.aliasserver.components.GameManager;
+import ru.feamor.aliasserver.components.NettyManager;
 import ru.feamor.aliasserver.game.types.GameTypeCollector;
 import ru.feamor.aliasserver.utils.Log;
 import ru.feamor.aliasserver.utils.TextUtils;
@@ -13,6 +16,11 @@ public class ConfigurationFactory {
 	
 	private static ConfigurationFactory instance;
 	
+	/**
+	 * Список конфигурационнх объектов. 
+	 * 		1.	Содержит в единственном экземпляре конфиги.
+	 * 		2.	По Классу (T.getClass()) можно получить / добавить конфиг.  
+	 */
 	private HashMap<Class, Config> configurations;
 	
 	private ConfigurationFactory() {
@@ -63,7 +71,7 @@ public class ConfigurationFactory {
 				Log.e(ConfigurationFactory.class, "Can`t configure. There is no configuration for class="+configableClass.getSimpleName());
 			}
 		} else {
-			Log.e(ConfigurationFactory.class, "Can`t configure. Object or Config is null");
+			Log.e(ConfigurationFactory.class, "Can`t configure. Object or Config is null for property: "+propertyName);
 		}
 	}
 	
@@ -77,7 +85,8 @@ public class ConfigurationFactory {
 		}
 		configurations.put(GameTypeCollector.class, new GameTypeCollectorConfig());
 		configurations.put(GameManager.class, new GameManagerConfig());
-		configurations.put(NettyConfig.class, new NettyConfig());
+		configurations.put(NettyManager.class, new NettyConfig());
+		configurations.put(DBManager.class, new DBConfig());
 		
 		Log.i(ConfigurationFactory.class, "Configuration complete");
 	}
