@@ -1,6 +1,7 @@
 package ru.feamor.aliasserver.db.requests;
 
 public class Requests {
+	
 	public static class Authorization {
 		
 		public static class AuthorizationTypes {
@@ -23,6 +24,29 @@ public class Requests {
 			
 			
 		}		
+	}
+	
+	public static class SystemCommands {
+		
+		public static class GetAllUserGamesWithStatus{
+			public static final int ID = 20;
+			public static final String SQL = "SELECT game_type.id, game_type.NAME, game_type.description, game_type.icon_url "
+					+ "FROM game_type "
+					+ "LEFT OUTER JOIN user_game_types ON user_game_types.fk_game_type = game_type.id "
+					+ "WHERE user_game_types.fk_user = ? "
+					+ "AND user_game_types.status = ?; ";
+			public static final int rq_user_id = 1;
+			public static final int rq_game_status = 2;
+			
+			public static final int rs_game_type_id = 1;
+			public static final int rs_game_type_name = 2;
+			public static final int rs_game_type_descrition = 3;
+			public static final int rs_game_type_icon_url = 4;
+		}
+		
+		static class TODO_GetAllUserGamesWithStatus_MD5 {
+			//TODO: add md5
+		}
 	}
 	
 	

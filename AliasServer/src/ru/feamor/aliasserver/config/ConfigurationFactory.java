@@ -8,7 +8,9 @@ import ru.feamor.aliasserver.base.Config;
 import ru.feamor.aliasserver.components.DBManager;
 import ru.feamor.aliasserver.components.GameManager;
 import ru.feamor.aliasserver.components.NettyManager;
+import ru.feamor.aliasserver.game.types.AuthorizationConfig;
 import ru.feamor.aliasserver.game.types.GameTypeCollector;
+import ru.feamor.aliasserver.games.Authorizator;
 import ru.feamor.aliasserver.utils.Log;
 import ru.feamor.aliasserver.utils.TextUtils;
 
@@ -87,6 +89,7 @@ public class ConfigurationFactory {
 		configurations.put(GameManager.class, new GameManagerConfig());
 		configurations.put(NettyManager.class, new NettyConfig());
 		configurations.put(DBManager.class, new DBConfig());
+		configurations.put(Authorizator.class, new AuthorizationConfig());
 		
 		Log.i(ConfigurationFactory.class, "Configuration complete");
 	}

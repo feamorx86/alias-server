@@ -72,10 +72,10 @@ public class SimpleChat extends BaseGame {
 	}
 	
 	@Override
-	protected void update() {
+	public void update() throws InterruptedException {
 		//TODO: add check of elapsed time
 		
-		if (isNeedStop()) {
+		if (needStopUpdate()) {
 			return;
 		}
 		

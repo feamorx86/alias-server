@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import ru.feamor.aliasserver.config.ConfigurationFactory;
 import ru.feamor.aliasserver.db.requests.AuthorizationParser;
+import ru.feamor.aliasserver.db.requests.GetGamesRequestParser;
 import ru.feamor.aliasserver.db.requests.Requests;
 import ru.feamor.aliasserver.utils.Log;
 
@@ -30,6 +31,7 @@ public class DBCommandFactory {
 			//TODO: Add include configurations
 		}
 		parsers.put(Requests.Authorization.EmailAndPassword.ID, new AuthorizationParser());	
+		parsers.put(Requests.SystemCommands.GetAllUserGamesWithStatus.ID, new GetGamesRequestParser());
 		Log.i(DBCommandFactory.class, "Configuration complete");
 	}
 	

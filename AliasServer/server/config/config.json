@@ -12,23 +12,34 @@
 			}
 		],	
 		
+		'authorization' : {
+			'id' : 1,
+			'timeToReceiveVersion' : 200000,
+			'timeToReceiveAuthorization' : 200000
+		},
+		
 		'games' : {
 			'classification' : {
 				'id' : 0,
 				'name' : 'All',
 				'description' : 'All avalable games',
-				'types' : [ 1 ]
+				'types' : [  ]
 								
 			},
 			
 			'types' : [
 				{
-					'alias' : 'authorization',
-					'id' : 1,
-					'timeToReceiveVersion' : 200000,
-					'timeToReceiveAuthorization' : 200000
+					
 				}
 			]
+		},
+		'threading' : {
+			'threads' : 5,
+			'updateTimerIntervel' : 1000,
+			'maxUpdateTime' : 200000,
+			'wakeUpdateInterval' : 5000,
+			'wakeThreadsInterval' : 10000,
+			'checkThreadsInterval' : 10000
 		}
 	},
 	

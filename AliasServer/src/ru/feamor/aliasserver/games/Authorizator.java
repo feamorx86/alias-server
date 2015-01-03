@@ -1,28 +1,29 @@
 package ru.feamor.aliasserver.games;
 
+import io.netty.buffer.ByteBuf;
+
 import org.apache.jcs.utils.struct.DoubleLinkedList;
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
-import org.json.JSONObject;
 
 import ru.feamor.aliasserver.commands.CommandTypes;
 import ru.feamor.aliasserver.commands.GameCommand;
 import ru.feamor.aliasserver.components.DBManager;
+import ru.feamor.aliasserver.components.GameManager;
+import ru.feamor.aliasserver.components.NettyManager;
 import ru.feamor.aliasserver.components.TimeManager;
 import ru.feamor.aliasserver.core.ComponentManager;
-import ru.feamor.aliasserver.db.DBCommandFactory;
 import ru.feamor.aliasserver.db.DBRequest;
+import ru.feamor.aliasserver.db.RunWithParamsDBRequest;
+import ru.feamor.aliasserver.db.DBRequest.RequestExecutor;
 import ru.feamor.aliasserver.db.requests.Requests;
 import ru.feamor.aliasserver.game.GameClient;
 import ru.feamor.aliasserver.game.GamePlayer;
-import ru.feamor.aliasserver.game.GameTags;
-import ru.feamor.aliasserver.game.GameType;
-import ru.feamor.aliasserver.game.types.AuthorizationGameType;
 import ru.feamor.aliasserver.netty.NettyClient;
 import ru.feamor.aliasserver.utils.Log;
 import ru.feamor.aliasserver.utils.RunWithParams;
 import ru.feamor.aliasserver.utils.TextUtils;
 
-public class Authorizator extends BaseGame {
+public class Authorizator {
 
 	public static final byte INVALID_COMMAND_ID = 0;
 	public static final byte INVALID_COMMAND_FORMAT = 1;
@@ -43,6 +44,9 @@ public class Authorizator extends BaseGame {
 		public static final int rs_pos_error = 1;
 	}
 	
+	public static final String Alias = "authorization";
+	public static final int DEFAULT_TYPE_ID = 1;
+	public static int TYPE_ID = DEFAULT_TYPE_ID;
 	
 	private DoubleLinkedList nonAuthorizedPlayers = new DoubleLinkedList();
 	private DoubleLinkedList nonAuthorizedPlayersTemp = new DoubleLinkedList();
@@ -53,11 +57,11 @@ public class Authorizator extends BaseGame {
 	private DoubleLinkedList authorizedPlayersTemp = new DoubleLinkedList();
 	private Object authorizedPlayersLocker = new Object();
 	
-	private AuthorizationGameType type;
+	private long timeToReceiveVersion;
+	private long timeToReceiveAuthorization;
 	
-	public void setType(GameType gameType) {
-		type = (AuthorizationGameType) gameType;
-	}
+	private boolean needStop = false;
+	
 	
 	public Object getAuthorizedPlayersLocker() {
 		return authorizedPlayersLocker;
@@ -67,17 +71,12 @@ public class Authorizator extends BaseGame {
 		return authorizedPlayers;
 	}
 	
-	public GameType getType() {
-		return type;
-	}
 	
-	@Override
 	public byte getTypeId() {
 		// TODO Auto-generated method stub
 		return CommandTypes.NEW_PLAYER.TYPE;
 	}
 
-	@Override
 	public void onNewPlayer(GameClient client) {
 		throw new RuntimeException("need use: onNewConnection for Authorization to catch new clients");
 	}
@@ -90,17 +89,27 @@ public class Authorizator extends BaseGame {
 		}
 	}
 
-	@Override
 	public void onPlayerDisconnect(GameClient player) {
 		//nothin
 	}
 	
+	protected GameCommand createCommand(short commandId) {
+		GameCommand command = new GameCommand(getTypeId(), commandId);
+		ByteBuf buf = NettyManager.get().getCommandAllocator().buffer();
+		command.setData(buf);
+		return command;
+	}
 	
-		
-	@Override
-	protected void update() {
-		super.update();
-		if (isNeedStop()) {
+	public boolean isNeedStop() {
+		return needStop;
+	}
+	
+	public void setNeedStop(boolean needStop) {
+		this.needStop = needStop;
+	}
+	
+	public void update() {
+		if (needStop) {
 			return;
 		}
 		
@@ -113,7 +122,7 @@ public class Authorizator extends BaseGame {
 		
 		for (DoubleLinkedListNode i = nonAuthorizedPlayersTemp.getFirst(); i!=null; i=i.next) {
 			AuthorizationInfo info = (AuthorizationInfo) i.getPayload();
-			info.updateTime(type.getTimeToReceiveVersion());
+			info.updateTime(getTimeToReceiveVersion());
 			info.state = AuthorizationInfo.WAIT_VERSION;
 			info.node = new DoubleLinkedListNode(info);
 			updatedClients.addLast(info.node);
@@ -166,10 +175,10 @@ public class Authorizator extends BaseGame {
 	}
 		
 	
-	private RunWithParams<DBRequest> db_loginAndPassword = new RunWithParams<DBRequest>() {
+	private RunWithParams<DBRequest> db_loginAndPassword = new RunWithParamsDBRequest() {
 		
 		@Override
-		public void run(DBRequest param) {
+		public void run() {
 			//TODO: if param.hasError() -> AUTH_RESULT_ERROR
 			GameCommand command;
 			AuthorizationInfo info = (AuthorizationInfo) param.getSender();
@@ -224,6 +233,7 @@ public class Authorizator extends BaseGame {
 					break;
 				}		
 			}
+			DBManager.get().recycleRequest(param);
 		}
 	};
 	
@@ -253,7 +263,8 @@ public class Authorizator extends BaseGame {
 				request.putParameter(TypeEmailPassword.rq_pos_email, login);
 				request.putParameter(TypeEmailPassword.rq_pos_password, password);
 				request.setSender(info);
-				request.setOnComplete(db_loginAndPassword);//TODO: add ability to make it possible to cancel if timeout. 
+				request.setOnComplete(db_loginAndPassword);//TODO: add ability to make it possible to cancel if timeout.
+				request.setOnExecuted(GameManager.get().getUpdateExecutor());
 				DBManager.get().executeAsync(request);
 				command.recycle();
 			} catch(Throwable ex) {
@@ -292,7 +303,7 @@ public class Authorizator extends BaseGame {
 						sendCommand.getData().writeShort(CommandTypes.NEW_PLAYER.P_AUTH.VERSION_LAST);
 					}
 					info.state = AuthorizationInfo.WAIT_AUTHORIZATION;
-					info.updateTime(type.getTimeToReceiveAuthorization());
+					info.updateTime(getTimeToReceiveAuthorization());
 					info.version = clientVersion;
 					info.client.sendCommand(sendCommand);
 				} else {
@@ -324,6 +335,22 @@ public class Authorizator extends BaseGame {
 			info.client.sendLastCommandAndClose(lastCommand);
 			playersToRemove.addLast(new DoubleLinkedListNode(currentNode));
 		}
+	}
+	
+	public long getTimeToReceiveAuthorization() {
+		return timeToReceiveAuthorization;
+	}
+	
+	public void setTimeToReceiveAuthorization(long timeToReceiveAuthorization) {
+		this.timeToReceiveAuthorization = timeToReceiveAuthorization;
+	}
+	
+	public long getTimeToReceiveVersion() {
+		return timeToReceiveVersion;
+	}
+	
+	public void setTimeToReceiveVersion(long timeToReceiveVersion) {
+		this.timeToReceiveVersion = timeToReceiveVersion;
 	}
 		
 	private static class AuthorizationInfo {

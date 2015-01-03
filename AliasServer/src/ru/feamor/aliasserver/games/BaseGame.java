@@ -1,47 +1,49 @@
 package ru.feamor.aliasserver.games;
 
+import java.util.Calendar;
+
 import io.netty.buffer.ByteBuf;
 
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
-import org.json.JSONObject;
 
+import ru.feamor.aliasserver.base.UpdateThreadController.ExecutionProblems;
+import ru.feamor.aliasserver.base.UpdateThreadController.ThreadUpdated;
 import ru.feamor.aliasserver.commands.GameCommand;
 import ru.feamor.aliasserver.components.GameManager;
 import ru.feamor.aliasserver.components.NettyManager;
-import ru.feamor.aliasserver.components.GameManager.Executed;
 import ru.feamor.aliasserver.game.GameClient;
 import ru.feamor.aliasserver.game.GameType;
 
-public abstract class BaseGame {
+public abstract class BaseGame implements ThreadUpdated {
 	/***
 	 * 10 Seconds
 	 */
 	public static final long DEFAULT_MAX_EXECUTE_TIME = 10 * 1000;
+	
+	protected boolean needStop = false;
+	protected DoubleLinkedListNode myUpdateNode = new DoubleLinkedListNode(this);
+	private int id;
+	protected GameType gameType;
+	protected boolean initialized = false;
+	private long lastUpdateTime = 0;
+	
+	public BaseGame() {
+		
+	}
+	
 	public abstract byte getTypeId();
 	public abstract void onNewPlayer(GameClient player);
 	public abstract void onPlayerDisconnect(GameClient player);
-	
-	private boolean needStop = false;
-	private GameManager.Executed executed;
-	private long config_maxExecuteTimeout;
-	
-	private int id;
-	
-	protected GameType gameType;
-	
-	public synchronized void askStop() {
-		needStop = true;
-	}
+
+	public boolean isInitialized() {
+		return initialized;
+	}	
 	
 	public int getId() {
 		return id;
 	}
 	public void setId(int id) {
 		this.id = id;
-	}
-	
-	public synchronized boolean isNeedStop() {
-		return needStop;
 	}
 	
 	public void setGameType(GameType gameType) {
@@ -52,33 +54,51 @@ public abstract class BaseGame {
 		return gameType;
 	}
 	
-	protected void update() {
-		
+	@Override
+	public void update() throws InterruptedException {
+		long now = Calendar.getInstance().getTimeInMillis();
+		if (now - lastUpdateTime < GameManager.get().getMinUpdateInterval()) {
+			Thread.sleep(GameManager.get().getMinUpdateInterval());
+			lastUpdateTime = Calendar.getInstance().getTimeInMillis();
+		} else {
+			lastUpdateTime = now;	
+		}
+		 
 	}
 	
-//	public void config(JSONObject config) {
-//		config_maxExecuteTimeout = config.optLong("maxExecuteTime", DEFAULT_MAX_EXECUTE_TIME);
-//	}
+	public void stop() {
+		needStop = true;
+	}
 	
-	public void start() {
-		executed = new GameManager.Executed();
-		executed.setGame(this);
-		executed.setMaxTime(config_maxExecuteTimeout);
-
-		updateRunnable = new Runnable() {
-			
-			@Override
-			public void run() {
-				update();
+	@Override
+	public void onProblem(Integer problemType, Object problem) {
+		if (problemType == null) {
+			//TODO: ???
+			onError(problem);
+		} else {
+			switch(problemType.intValue()) {
+			case ExecutionProblems.UPDATE_EXEPTION:
+				onError(problem);
+				break;
+			case ExecutionProblems.THREAD_UPDATE_TIMEOUT :
+				onUpdateTimeout();
+				break;
+			case ExecutionProblems.NO_PROBLEM : 
+				//TODO????
+				break;
+			default:
+				//TODO: ???
+				onError(problem);
+				break;
 			}
-		};
+		}
 	}
 	
-	public void onUpdateTimeout() {
+	protected void onUpdateTimeout() {
 		
 	}
 	
-	public void onError(Object problem) {
+	protected void onError(Object problem) {
 		
 	}
 	
@@ -88,36 +108,30 @@ public abstract class BaseGame {
 		command.setData(buf);
 		return command;
 	}
-	
-	public void onStop() {
 		
+	
+	@Override
+	public void setUpdateNode(DoubleLinkedListNode node) {
+		myUpdateNode = node;
 	}
 	
-	public BaseGame() {
-		
-	}
-	
-	public GameManager.Executed getExecuted() {
-		return executed;
-	}
-	
-	protected Runnable updateRunnable;
-	
-	public Runnable getUpdate() {
-		return updateRunnable;
-	}
-	
-	public void doUpdate() {
-		getUpdate().run();
-	}
-	
-	public void onStarted() {
-		
-	}
-	
-	protected DoubleLinkedListNode myUpdateNode = new DoubleLinkedListNode(this);
-	
-	public DoubleLinkedListNode getMyUpdateNode() {
+	@Override
+	public DoubleLinkedListNode getUpdateNode() {
 		return myUpdateNode;
+	}
+	
+	@Override
+	public synchronized boolean needStopUpdate() {
+		return needStop;
+	}
+	
+	public synchronized void askStop() {
+		needStop = true;
+	}
+		
+	
+	@Override
+	public void wasError() {
+		
 	}
 }

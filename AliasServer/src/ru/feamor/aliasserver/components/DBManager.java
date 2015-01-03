@@ -11,6 +11,7 @@ import org.apache.jcs.utils.struct.DoubleLinkedList;
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 import org.json.JSONObject;
 import org.postgresql.ds.PGPoolingDataSource;
+import org.postgresql.util.PGobject;
 
 import ru.feamor.aliasserver.core.Component;
 import ru.feamor.aliasserver.db.DBCommandFactory;
@@ -115,13 +116,15 @@ public class DBManager extends Component {
 	public void executeRequestNow(DBRequest request) {
 		Connection connection = null;
 		PreparedStatement statement = null;
-		ResultSet resultSet = null; 
+		ResultSet resultSet = null;
+		
 		try {
 			connection = dataSources.getConnection();
 			statement = connection.prepareStatement(request.getSql());
-			request.setupRequest(statement);
-			resultSet = statement.executeQuery();
-			request.parseResponce(resultSet);
+			if (request.setupRequest(statement)) {
+				resultSet = statement.executeQuery();
+				request.parseResponce(resultSet);	
+			}
 		} catch (SQLException ex) {
 			request.setHasError(true);
 			request.setError(ex);
@@ -152,7 +155,9 @@ public class DBManager extends Component {
 					e.printStackTrace();
 				}
 		}
-		request.runOnComplete();
+		if (!request.isCanceled()) {
+			request.runOnComplete();
+		}
 	}
 	
 	@Override

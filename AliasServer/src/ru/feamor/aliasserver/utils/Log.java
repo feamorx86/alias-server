@@ -46,4 +46,8 @@ public class Log {
 		logger.error(CLASS_MARKER, "CLASS {} | MSG | {}", clazz.getSimpleName(), error, throwable);
 	}	
 	
+	public static void e(String tag, String error, Throwable throwable) {
+		logger.error(CLASS_MARKER, "CLASS {} | MSG | {}", tag, error, throwable);
+	}
+	
 }

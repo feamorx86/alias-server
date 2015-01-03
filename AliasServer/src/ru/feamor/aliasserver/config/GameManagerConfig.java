@@ -5,9 +5,7 @@ import org.json.JSONObject;
 
 import ru.feamor.aliasserver.base.Config;
 import ru.feamor.aliasserver.components.GameManager;
-import ru.feamor.aliasserver.game.types.AuthorizationGameType;
 import ru.feamor.aliasserver.game.types.GameTypeCollector;
-import ru.feamor.aliasserver.games.BaseGame;
 import ru.feamor.aliasserver.utils.Log;
 
 public class GameManagerConfig implements Config<GameManager> {
@@ -22,10 +20,19 @@ public class GameManagerConfig implements Config<GameManager> {
 		}
 		JSONObject gameLogic = config.optJSONObject("gameLogic");
 		if (gameLogic!=null) {
-			gameManager.setConfig_maxGameLogicThreads(gameLogic.optInt("maxThreads", GameManager.DEFAULT_MAX_GAME_LOGIC_THREADS));
+			
 		}
 		
 		gameManager.getGamesFactory().configure(config.optJSONObject("games"));
 		
+		JSONObject threadingJson = config.optJSONObject("threading");
+		if (threadingJson!=null) {
+			gameManager.getThreadController().configure(threadingJson);
+		}
+		
+		JSONObject authJson = config.optJSONObject("authorization");
+		if (authJson!=null) {
+			ConfigurationFactory.configure(gameManager.getAuthorizator(), authJson);
+		}
 	}
 }

@@ -1,7 +1,11 @@
 package ru.feamor.aliasserver.game;
 
+import io.netty.buffer.ByteBuf;
+
 import java.util.HashMap;
 
+import ru.feamor.aliasserver.commands.GameCommand;
+import ru.feamor.aliasserver.components.NettyManager;
 import ru.feamor.aliasserver.netty.NettyClient;
 
 public class GameClient {
@@ -46,4 +50,12 @@ public class GameClient {
 	public void removeTag(int tag) {
 		tags.remove(Integer.valueOf(tag));
 	}
+	
+	public GameCommand createCommand(byte service, short commandId) {
+		GameCommand command = new GameCommand(service, commandId);
+		ByteBuf buf = NettyManager.get().getCommandAllocator().buffer();
+		command.setData(buf);
+		return command;
+	}
+	
 }
