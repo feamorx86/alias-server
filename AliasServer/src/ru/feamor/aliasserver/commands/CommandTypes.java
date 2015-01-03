@@ -13,6 +13,11 @@ public class CommandTypes {
 		public static final short VERSION						= 0; 
 		public static final short LOGIN							= 1;
 		public static final short LOGOUT						= 2;
+		
+		public static final short GET_GAME_TYPES	 			= 3;
+		public static final short SELECT_GAME_TYPE 				= 4;
+		public static final short DISCONNECT_BY					= 5;
+		public static final short CANCEL_GET_GAME_TYPES	 		= 6;
 	}
 
 	public static class NEW_PLAYER {

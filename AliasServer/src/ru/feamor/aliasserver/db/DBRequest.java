@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 
+import ru.feamor.aliasserver.base.RunnableExecutor;
 import ru.feamor.aliasserver.components.GameManager;
 import ru.feamor.aliasserver.utils.RunWithParams;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -17,6 +18,7 @@ public class DBRequest {
 	protected DoubleLinkedListNode node;
 	protected RunWithParams<DBRequest> onComplete;
 	protected boolean hasError;
+	protected boolean canceled;
 	protected Object error;
 	
 	public DBRequest() {
@@ -25,6 +27,8 @@ public class DBRequest {
 		parameters = new TIntObjectHashMap<Object>();
 		results = new TIntObjectHashMap<Object>();
 		onComplete = null;
+		canceled = false;
+		hasError = false;
 	}
 	
 	public void recycle() {
@@ -35,6 +39,8 @@ public class DBRequest {
 		results.clear();
 		results = null;
 		onComplete = null;
+		canceled = false;
+		hasError = false;
 	}
 	
 	public void putParameter(int paramId, Object value) {
@@ -85,8 +91,8 @@ public class DBRequest {
 		return requestParser.getSql();
 	}
 
-	public void setupRequest(PreparedStatement statement) {
-		requestParser.setupRequest(statement, this);
+	public boolean setupRequest(PreparedStatement statement) {
+		return requestParser.setupRequest(statement, this);
 	}
 	
 	public void parseResponce(ResultSet result) {
@@ -114,11 +120,26 @@ public class DBRequest {
 	}
 	
 	public void runOnComplete() {
-		onComplete.run(this);
+		onComplete.setParam(this);
+		if (runnableExecutor!=null) {			
+			runnableExecutor.executeRunnable(onComplete);
+		} else {
+			onComplete.run();
+		}
 	}
 	
 	public void setOnComplete(RunWithParams<DBRequest> onComplete) {
 		this.onComplete = onComplete;
+	}
+	
+	public interface RequestExecutor {
+		void execute(RunWithParams<DBRequest> onComplete, DBRequest dbRequest);
+	}
+	
+	private RunnableExecutor runnableExecutor;
+	
+	public void setOnExecuted(RunnableExecutor runnableExecutor) {
+		this.runnableExecutor = runnableExecutor;
 	}
 	
 	public Object getError() {
@@ -137,4 +158,11 @@ public class DBRequest {
 		return this.hasError;
 	}
 	
+	public boolean isCanceled() {
+		return canceled;
+	}
+	
+	public void setCanceled(boolean canceled) {
+		this.canceled = canceled;
+	}
 }

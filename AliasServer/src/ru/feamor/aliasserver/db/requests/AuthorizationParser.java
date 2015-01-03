@@ -13,7 +13,7 @@ import ru.feamor.aliasserver.utils.Log;
 public class AuthorizationParser implements RequestParser {
 
 	@Override
-	public void setupRequest(PreparedStatement statement, DBRequest request) {
+	public boolean setupRequest(PreparedStatement statement, DBRequest request) {
 		try {
 			String email = (String)request.getParameter(TypeEmailPassword.rq_pos_email);
 			String password = (String)request.getParameter(TypeEmailPassword.rq_pos_password);
@@ -22,6 +22,7 @@ public class AuthorizationParser implements RequestParser {
 		} catch (SQLException exception) {
 			Log.e(AuthorizationParser.class, "Can`t setup request, error", exception);
 		}
+		return true;
 	}
 
 	@Override
@@ -51,7 +52,7 @@ public class AuthorizationParser implements RequestParser {
 	@Override
 	public int id() {
 		// TODO Auto-generated method stub
-		return 0;
+		return EmailAndPassword.ID;
 	}
 		
 }

@@ -12,7 +12,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ru.feamor.aliasserver.game.GameType;
-import ru.feamor.aliasserver.game.types.AuthorizationGameType;
 import ru.feamor.aliasserver.games.BaseGame;
 import ru.feamor.aliasserver.utils.Log;
 
@@ -42,12 +41,12 @@ public class GamesFactory {
 		return gameTypes.get(id);
 	}
 	
-	public BaseGame createGame(int typeId) {
+	public BaseGame createGame(int typeId, Object params) {
 		GameType type = getType(typeId);
 		BaseGame game = null;
 		if(type != null) {
 			try {
-				game = type.createGame();
+				game = type.createGame(params);
 			} catch(Exception ex) {
 				Log.e(GamesFactory.class, "Failt to create game for type, id="+typeId+", alias ="+type.getAlias(), ex);
 				game = null;
@@ -61,7 +60,7 @@ public class GamesFactory {
 	}
 	
 	private void registerAliases(JSONObject config) {
-		gameTypeClasses.put(AuthorizationGameType.Alias, AuthorizationGameType.class);
+//		gameTypeClasses.put(AuthorizationGameType.Alias, AuthorizationGameType.class);
 	}
 	
 	public void loadGameTypesFromJson(JSONArray jsonTypes) {

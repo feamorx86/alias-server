@@ -1,42 +1,58 @@
 package ru.feamor.aliasserver.components;
 
+import java.lang.ref.Reference;
+import java.util.ArrayList;
+import java.util.Calendar;
+
 import gnu.trove.map.hash.TIntObjectHashMap;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
-import io.netty.util.concurrent.Future;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.HashMap;
-import java.util.concurrent.Callable;
-
-import org.apache.commons.logging.LogFactory;
 import org.apache.jcs.utils.struct.DoubleLinkedList;
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
-import org.apache.logging.log4j.core.util.KeyValuePair;
 import org.json.JSONObject;
 
+import ru.feamor.aliasserver.base.DataObject;
+import ru.feamor.aliasserver.base.RunnableExecutor;
+import ru.feamor.aliasserver.base.UpdateThreadController;
+import ru.feamor.aliasserver.base.WithRequestId;
+import ru.feamor.aliasserver.commands.CommandTypes;
+import ru.feamor.aliasserver.commands.CommandTypes.SYSTEM;
+import ru.feamor.aliasserver.commands.GameCommand;
+import ru.feamor.aliasserver.commands.GameCommandHolder;
+import ru.feamor.aliasserver.commands.SystemCommandsProcessor;
+import ru.feamor.aliasserver.core.ClientInProcessor;
+import ru.feamor.aliasserver.core.ClientsProcessor;
 import ru.feamor.aliasserver.core.Component;
+import ru.feamor.aliasserver.db.DBRequest;
+import ru.feamor.aliasserver.db.RunWithParamsDBRequest;
+import ru.feamor.aliasserver.db.DBRequest.RequestExecutor;
+import ru.feamor.aliasserver.db.requests.Requests;
 import ru.feamor.aliasserver.game.GameClient;
 import ru.feamor.aliasserver.game.GameTags;
-import ru.feamor.aliasserver.game.types.AuthorizationGameType;
+import ru.feamor.aliasserver.game.UsersPool;
+import ru.feamor.aliasserver.game.models.GameTypeModel;
 import ru.feamor.aliasserver.game.types.GameTypeCollector;
 import ru.feamor.aliasserver.games.Authorizator;
 import ru.feamor.aliasserver.games.BaseGame;
+import ru.feamor.aliasserver.games.Authorizator.TypeEmailPassword;
 import ru.feamor.aliasserver.netty.NettyClient;
 import ru.feamor.aliasserver.utils.Log;
+import ru.feamor.aliasserver.utils.RunWithParams;
+import ru.feamor.aliasserver.utils.TextUtils;
 
 public class GameManager extends Component  {
 	
-	public static final int DEFAULT_MAX_GAME_LOGIC_THREADS =5;
+	public static final int MIN_UPDATE_INTERVAL = 200;
 	
 	private GameTypeCollector typeController;	
-	
 	private TIntObjectHashMap<BaseGame> activeGames;
-	private DefaultEventExecutorGroup gameLogicEventLoop;
-	private int config_maxGameLogicThreads = DEFAULT_MAX_GAME_LOGIC_THREADS;
-	private Thread managerThread;
 	private Authorizator authorizator;
-	private DoubleLinkedList playersPoll = new DoubleLinkedList();
 	private GamesFactory gamesFactory = new GamesFactory();
+	private UpdateThreadController GameLogicExecutor;
+	private Thread managerThread;	
+	private int minUpdateInterval = MIN_UPDATE_INTERVAL;
+	private long lastUpdateTime = 0;
+	private UsersPool usersPool;
+	private SystemCommandsProcessor systemCommandsProcessor = new SystemCommandsProcessor();
 	
 	public GameManager() {
 	
@@ -52,270 +68,198 @@ public class GameManager extends Component  {
 		gamesFactory = new GamesFactory();
 		typeController = new GameTypeCollector();
 		activeGames = new TIntObjectHashMap<BaseGame>();
+		GameLogicExecutor = new UpdateThreadController("GameLogic");
+		authorizator = new Authorizator();
+		usersPool = new UsersPool();
 	}
-	
-	private boolean running = false;
-	public synchronized boolean isRunning() {
-		return running;
-	}
-	
-	@Override
-	public void config(JSONObject config) {
-		super.config(config);
-		authorizator = (Authorizator) gamesFactory.createGame(AuthorizationGameType.TYPE_ID);
-		if (authorizator == null) {			
-			throw new RuntimeException("Fail to start: Authorization == null");
-		}
-	}
-	
+		
 	@Override
 	public void onStart() {
 		super.onStart();
-		gameLogicEventLoop = new DefaultEventExecutorGroup(config_maxGameLogicThreads);
-		managerThread = new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				synchronized(GameManager.this) {
-					running = true;
-				}
-				authorizator.start();
-				updateLoop();
-				synchronized(GameManager.this) {
-					running = false;
+		GameLogicExecutor.startController();
+		usersPool.startUpdate();
+		managerThread = new Thread(updateRunnable, "GameManagerThread");
+		managerThread.start();
+		
+		GameLogicExecutor.addUpdateObject(systemCommandsProcessor);
+	}
+	
+	private DoubleLinkedList runInUpdate = new DoubleLinkedList();
+	private DoubleLinkedList runInUpdateTemp = new DoubleLinkedList();
+	private Object runInUpdateLocker = new Object();
+	
+	private Runnable updateRunnable = new Runnable() {
+		
+		@Override
+		public void run() {
+			Log.i(GameManager.class, "Start game logic");
+			while (!Thread.interrupted()) {
+				updateNewPlayers();
+				executeUpdateRunnables();
+//				updateUserPoll();
+				long now = Calendar.getInstance().getTimeInMillis();
+				if (now - lastUpdateTime < getMinUpdateInterval()) {
+					try {
+						Thread.sleep(getMinUpdateInterval());
+					} catch (InterruptedException iex) {
+						return;
+					}
+					lastUpdateTime = Calendar.getInstance().getTimeInMillis();
+				} else {
+					lastUpdateTime = now;	
 				}
 			}
-		}, "GameManagerThread");
-		managerThread.start();
-	}
+		}
+	};
 	
-	public Authorizator getAuthorizator() {
-		return authorizator;
-	}
-	
-	public GamesFactory getGamesFactory() {
-		return gamesFactory;
-	}
-	
-	private void updateLoop() {
-		Log.i(GameManager.class, "Start game logic");
-		while (!Thread.interrupted()) {
-			long startTime = TimeManager.get().getNow();
-			updateNewPlayers();
-			updateUserPoll();
-			updateGameLogic();
-			long stopTime =  TimeManager.get().getNow();
-			long delta = stopTime - startTime;
-			//TODO: add better time managment
-			if (delta < confing_minUpdateTime) {
-				try {
-					Thread.sleep(confing_minUpdateTime - delta);
-				} catch(InterruptedException ex) {
-					break;
+	private void executeUpdateRunnables() {
+		synchronized (runInUpdateLocker) {
+			runInUpdateTemp.removeAll();
+			DoubleLinkedList temp = runInUpdateTemp;
+			runInUpdateTemp = runInUpdate;
+			runInUpdate = temp;
+		}
+		
+		for(DoubleLinkedListNode i = runInUpdateTemp.getFirst(); i!=null; i=i.next) {
+			Runnable r = (Runnable) i.getPayload();
+			try {
+				r.run();
+			} catch(Throwable ex) {
+				if (ex instanceof InterruptedException) {
+					throw ex;
+				} else {
+					Log.e(GameManager.class, "fail to run updates", ex);
 				}
 			}
 		}
 	}
 	
+	private RunnableExecutor updateExecutor = new RunnableExecutor() {
+		
+		@Override
+		public void executeRunnable(Runnable r) {
+			executeInUpdate(r);
+		}
+	};
+	
+	public RunnableExecutor getUpdateExecutor() {
+		return updateExecutor;
+	}
+	
+	public void executeInUpdate(Runnable r) {
+		synchronized (runInUpdateLocker) {
+			runInUpdate.addFirst(new DoubleLinkedListNode(r));
+		}
+	}
+			
 	public void stop() {
+		authorizator.setNeedStop(true);
 		managerThread.interrupt();
+		GameLogicExecutor.stopController();
 	}
 	
 	public void addNewPlayer(NettyClient gameClient) {
 		authorizator.onNewConnection(gameClient);
 	}
 	
-	public void updateNewPlayers() {		
-		authorizator.doUpdate();
+	public void updateNewPlayers() {
+		authorizator.update();
 		synchronized (authorizator.getAuthorizedPlayersLocker()) {
-			DoubleLinkedList list = authorizator.getAuthorizedPlayers();
-			for (DoubleLinkedListNode i = list.getFirst(); i!=null; i=i.next) {
+			for (DoubleLinkedListNode i = authorizator.getAuthorizedPlayers().getFirst(); i!=null; i=i.next) {
 				GameClient client = (GameClient) i.getPayload();
-				DoubleLinkedListNode node = new DoubleLinkedListNode(client);
-				client.putTag(GameTags.TAG_GAME_PLAYER_POLL_NODE, node);
-				playersPoll.addLast(node);
-			}
-			list.removeAll();
-		}
-	}
-	
-	public void updateUserPoll() {
-		//check user timeout (long seat on server 3h+)
-		//check user commands
-			//process user commands
-				// - change user info
-				// - start game
-				// - resume game
-				// - ...
-	}
-	
-	private DoubleLinkedList executedUpdates = new DoubleLinkedList();
-	
-	private DoubleLinkedList executedForRemove = new DoubleLinkedList();
-	private DoubleLinkedList completeExecuted = new DoubleLinkedList();
+				
+				ClientInUsersPool userInPool = new ClientInUsersPool();
 
-	private DoubleLinkedList newGames = new DoubleLinkedList();
-	private DoubleLinkedList newGamesTemp = new DoubleLinkedList();
-	private Object newGamesLocker = new Object();
-	
-	private DoubleLinkedList stoppingGames = new DoubleLinkedList();
-	private DoubleLinkedList stoppingGamesTemp = new DoubleLinkedList();
-	private Object stoppingGamesLocker = new Object();
-	
-		
-	public void stopGame(BaseGame game) {
-		synchronized(stoppingGamesLocker) {
-			stoppingGames.addLast(new DoubleLinkedListNode(game));
+				userInPool.clinet = client;
+				userInPool.addedAt = Calendar.getInstance().getTimeInMillis();
+				userInPool.processprNode = new DoubleLinkedListNode(userInPool);
+				userInPool.lastActivity = userInPool.addedAt;
+				systemCommandsProcessor.addClient(userInPool);
+			}
+			authorizator.getAuthorizedPlayers().removeAll();
 		}
 	}
+	
+	
+	public static class ClientInUsersPool implements ClientInProcessor {
+		GameClient clinet = null;
+		long addedAt = 0;
+		DoubleLinkedListNode processprNode = new DoubleLinkedListNode(this);
+		boolean inGame = false;
+		boolean isStopped = false;
 		
-	public void addGame(BaseGame game) {
-		synchronized(newGamesLocker) {
-			newGames.addLast(new DoubleLinkedListNode(game));
+		private int state;
+		
+		long lastActivity = 0;
+
+		@Override
+		public DoubleLinkedListNode getProcessorNode() {
+			return processprNode; 
 		}
-	}
-		
-	public void updateGameLogic() {
-//		long startTime = TimeManager.get().getNow();
-		long now;
-		//update new games
-		synchronized(newGamesLocker) {
-			DoubleLinkedList temp = newGamesTemp;
-			newGamesTemp = newGames;
-			newGames = temp;
+
+		@Override
+		public GameClient getGameClient() {
+			return clinet;
 		}
-		
-		for(DoubleLinkedListNode i = newGamesTemp.getFirst(); i!=null; i=i.next) {
-			BaseGame game = (BaseGame) i.getPayload();
-			DoubleLinkedListNode node = new DoubleLinkedListNode(game.getExecuted());
-			completeExecuted.addLast(node);
-			try {				
-				game.onStarted();
-			} catch(Throwable ex) {
-				//TODO: add handle errors
-				game.onError(ex);
-				stopGame(game);
-			}
+
+		@Override
+		public void onAdded() {
+			
 		}
-		newGamesTemp.removeAll();
-		
-		//TODO: add check of time
-		
-		//update stopped games
-		synchronized(stoppingGamesLocker) {
-			DoubleLinkedList temp = stoppingGamesTemp;
-			stoppingGamesTemp = stoppingGames;
-			stoppingGames = temp;
+
+		@Override
+		public void onRemoved() {
+			
 		}
 		
-		for(DoubleLinkedListNode i = stoppingGamesTemp.getFirst(); i!=null; i=i.next) {
-			BaseGame game = (BaseGame) i.getPayload();
-			game.getExecuted().needStopAfterExecute = true;
+		@Override
+		public int getState() {
+			return state;
 		}
-		stoppingGamesTemp.removeAll();
 		
-		//TODO: add check of time
-		
-		//check if game time is out
-		now = TimeManager.get().getNow();
-		for(DoubleLinkedListNode i = executedUpdates.getFirst(); i!=null; i=i.next) {
-			Executed exec = ((BaseGame) i.getPayload()).getExecuted();
-			if (exec.future.isDone()) {
-				completeExecuted.addLast(new DoubleLinkedListNode(exec));
-				executedForRemove.addLast(new DoubleLinkedListNode(i));
-			} else {
-				if (exec.isTimeout(now)) {
-					exec.future.cancel(true);
-				}
-			}
+		@Override
+		public void setState(int newState) {
+			state = newState;
 		}
-		//Remove already executed
-		for(DoubleLinkedListNode i = executedForRemove.getFirst(); i!=null; i=i.next) {
-			DoubleLinkedListNode node = (DoubleLinkedListNode) i.getPayload();
-			executedUpdates.remove(node);
-		}
-		executedForRemove.removeAll();
-		
-		//Add new updates
-		for(DoubleLinkedListNode i = completeExecuted.getFirst(); i!=null; i=i.next) {
-			BaseGame game = (BaseGame) i.getPayload();
-			if (game.getExecuted().needStopAfterExecute) {
-				try {
-					game.onStop();
-				} catch(Throwable ex) {
-					game.onError(ex);
-				}
-				game.getExecuted().needStopAfterExecute = false;
-			} else {
-				Future<?> future = gameLogicEventLoop.submit(game.getUpdate());
-				if (future!=null) {
-					game.getExecuted().setStart(TimeManager.get().getNow());
-					game.getExecuted().setFuture(future);
-					executedUpdates.addLast(new DoubleLinkedListNode(game));
-				} else {
-					//TODO: need add handle
-				}
-			}
-		}
-		completeExecuted.removeAll();//TODO: может тут стоит добавить запуск отложенных тасков, на которые не хватило потоков 
-		
-		//TODO: add better time managment
 	}
 	
-	public static final long MIN_UPDATE_TIME = 500;   
-	private long confing_minUpdateTime = MIN_UPDATE_TIME;
+//	public void updateUserPoll() {
+//		//Важно! чтобы колекция не изменялась одновременно с перебором
+//		
+//		for (DoubleLinkedListNode i = playersPoll.getFirst(); i!=null; i=i.next) {
+//			ClientInUsersPool userInPool = (ClientInUsersPool) i.getPayload();
+//			if (userInPool.isStopped) {
+//				userInPool.clinet.getConnection().close();
+//				DoubleLinkedListNode next = i.next;
+//				playersPoll.remove(i);
+//				i = next;
+//			} else {
+//				if (userInPool.inGame) {
+//					//game should check client
+//				} else {
+//					//test on new SYSTEM commands
+//					GameCommand command = userInPool.clinet.getConnection().getFirstReceivedCommand(CommandTypes.SYSTEM.TYPE);
+//					if (command!=null) {
+//						userInPool.lastActivity = Calendar.getInstance().getTimeInMillis();
+//						processClientCommand(userInPool, command);
+//					} else {
+//						//check client timeout
+//						long now = Calendar.getInstance().getTimeInMillis();
+//						if (now - userInPool.lastActivity > 60 * 1000) {
+//							userInPool.isStopped = true;
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
 		
+//	private void processClientCommand(ClientInUsersPool userInPool, GameCommand command) {
+//		
+//	}
+
 	public GameTypeCollector getTypeController() {
 		return typeController;
-	}
-	
-	public void setConfig_maxGameLogicThreads(int config_maxGameLogicThreads) {
-		this.config_maxGameLogicThreads = config_maxGameLogicThreads;
-	}
-	
-	public static class Executed {
-		private BaseGame game;
-		private long start;
-		private long maxTime;
-		private Future<?> future;		
-		private boolean needStopAfterExecute;
-		
-		public boolean isTimeout(long now) {
-			boolean result = now - start > maxTime;
-			return result;
-		}
-		
-		public void setFuture(Future<?> future) {
-			this.future = future;
-		}
-		
-		public Future<?> getFuture() {
-			return future;
-		}
-		
-		public void setGame(BaseGame game) {
-			this.game = game;
-		}
-		
-		public BaseGame getGame() {
-			return game;
-		}
-		
-		public void setMaxTime(long maxTime) {
-			this.maxTime = maxTime;
-		}
-		
-		public long getMaxTime() {
-			return maxTime;
-		}
-		
-		public void setStart(long start) {
-			this.start = start;
-		}
-		
-		public long getStart() {
-			return start;
-		}
 	}
 	
 	private static int lastGameId = 0;
@@ -340,20 +284,35 @@ public class GameManager extends Component  {
 				}
 			}
 			
-		}
-		
+		}		
 		return result;
 	}
 
-	public BaseGame startGame(int typeId) {
-		BaseGame game = gamesFactory.createGame(typeId);
+	public BaseGame startGame(int typeId, Object params) {
+		BaseGame game = gamesFactory.createGame(typeId, params);
 		if (game != null) {
 			int gameId = generateGameId();
 			game.setId(gameId);
 			activeGames.put(gameId, game);
-			game.onStarted();
+			GameLogicExecutor.addUpdateObject(game);
 		}
 		return game;
+	}
+	
+	public GamesFactory getGamesFactory() {
+		return gamesFactory;
+	}
+	
+	public UpdateThreadController getThreadController() {
+		return GameLogicExecutor;
+	}
+	
+	public Authorizator getAuthorizator() {
+		return authorizator;
+	}
+	
+	public int getMinUpdateInterval() {
+		return minUpdateInterval;
 	}
 }
  
