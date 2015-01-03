@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -294,9 +295,12 @@ public class UpdateThreadController implements RunnableExecutor {
 		
 //	private long startWaitThreadTime = 0;
 //	private long startWaitObjectTime = 0;
+	/**
+	 * Search object to update, and skip ThreadPendingUpdated, witch waiting. 
+	 * @return ThreadUpdated
+	 */
 	
-	private void updateThreads() {	
-		
+	private void updateThreads() {		
 		while(!needStop) {
 			if (Thread.interrupted()) {
 				needStop = true;	
@@ -304,24 +308,59 @@ public class UpdateThreadController implements RunnableExecutor {
 				ThreadUpdated objectToUpdate = null;			
 				UpdateObjectThread freeThread = getFreeThread();
 				if (freeThread!=null) {
+					long now = Calendar.getInstance().getTimeInMillis();
+					boolean hasPending = false;
+					long minWaitPending = Long.MAX_VALUE;
 					synchronized (activeQeue) {
 						DoubleLinkedListNode node = activeQeue.getFirst();
-						if (node!=null) {
+						while (node!=null) {
 							objectToUpdate = (ThreadUpdated) node.getPayload();
-							activeQeue.remove(node);
+							if (objectToUpdate instanceof ThreadPendingUpdated) {
+								ThreadPendingUpdated pendingObject = (ThreadPendingUpdated) objectToUpdate;
+								if (pendingObject.isPending()) {
+									hasPending = true;
+									if (now > pendingObject.getExecuteTime()) {
+										activeQeue.remove(node);
+										node = null;
+									} else {
+										if (pendingObject.getExecuteTime() < minWaitPending) {
+											minWaitPending = pendingObject.getExecuteTime();
+										}
+										node = node.next;
+									}
+								}
+							} else {
+								activeQeue.remove(node);
+								node = null;
+							}
 						}
 					}
-					
+
 					if (objectToUpdate != null) {
 						freeThread.execute(objectToUpdate);
 					} else {
-//						startWaitObjectTime = Calendar.getInstance().getTimeInMillis();
-						try {
-							updateSemaphore.drainPermits();
-							updateSemaphore.acquire();
-						} catch(InterruptedException iex) {
-							needStop = true;
-						}
+						
+						if (hasPending) {
+							long delta = minWaitPending - now;
+//							startWaitObjectTime = Calendar.getInstance().getTimeInMillis();
+							try {
+								updateSemaphore.drainPermits();
+								updateSemaphore.tryAcquire(delta, TimeUnit.MILLISECONDS);
+								вот тут нужно проверить что да как "!!
+							} catch(InterruptedException iex) {
+								needStop = true;
+							}
+							
+						} else {
+//							startWaitObjectTime = Calendar.getInstance().getTimeInMillis();
+							try {
+								updateSemaphore.drainPermits();
+								updateSemaphore.acquire();
+							} catch(InterruptedException iex) {
+								needStop = true;
+							}
+	
+						}						
 					}
 				} else {
 //					startWaitThreadTime = Calendar.getInstance().getTimeInMillis();
@@ -487,6 +526,11 @@ public class UpdateThreadController implements RunnableExecutor {
 		void update() throws InterruptedException;
 		void onProblem(Integer problemType, Object problem);
 		void wasError();
+	}
+	
+	public interface ThreadPendingUpdated extends ThreadUpdated {
+		boolean isPending();
+		long getExecuteTime();
 	}
 	
 	public class RunnableInThreadUpdated implements ThreadUpdated {
