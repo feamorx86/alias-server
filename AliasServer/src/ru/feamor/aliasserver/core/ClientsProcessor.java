@@ -8,7 +8,7 @@ import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 import ru.feamor.aliasserver.base.RunnableExecutor;
 import ru.feamor.aliasserver.base.UpdateThreadController;
 
-public abstract class ClientsProcessor implements UpdateThreadController.ThreadUpdated{
+public abstract class ClientsProcessor implements UpdateThreadController.ThreadPendingUpdated{
 	public static final long DEFAULT_MIN_UPDATE_TIME = 200;
 	
 	protected DoubleLinkedList clients = new DoubleLinkedList();
@@ -46,52 +46,66 @@ public abstract class ClientsProcessor implements UpdateThreadController.ThreadU
 		return DEFAULT_MIN_UPDATE_TIME;
 	}
 	
+	private boolean pending = false;
+	private long nextUpdateTime;
+	
+	@Override
+	public boolean isPending() {
+		return pending;
+	}
+	
+	@Override
+	public long getExecuteTime() {
+		return nextUpdateTime;
+	}
+	
 	@Override
 	public void update() throws InterruptedException {
-		if (needStop) return;
-		
-		long now = Calendar.getInstance().getTimeInMillis();
-		long delta = now - lastUpdateTime;
-		//TODO: добавить в ThreadController нормальное отложенное выполнение
-		//TODO: или добавить блокировки \ увеломления
-		if (now - lastUpdateTime < getMinUpdateTime()) {
-			Thread.sleep(getMinUpdateTime() - delta);
-		} else {
-			lastUpdateTime = now;
-		}
-		
-		synchronized (newClients) {
-			DoubleLinkedListNode node = newClients.getFirst();
-			while(node!=null) {
-				DoubleLinkedListNode next = node.next;
-				newClients.remove(node);
-				synchronized (clientsLocker) {
-					clients.addLast(node);
-				}					
-				node = next;
-			}
-		}
-		
-		synchronized (clintsForRemove) {
-			DoubleLinkedListNode node = clintsForRemove.getFirst();
-			while(node!=null) {
-				DoubleLinkedListNode next = node.next;
-				clintsForRemove.remove(node);
-				synchronized (clientsLocker) {
-					clients.addLast(node);
+		if (!needStop) {
+			pending = false;
+			long now = Calendar.getInstance().getTimeInMillis();
+			long delta = now - lastUpdateTime;
+			
+			if (delta < getMinUpdateTime()) {
+				nextUpdateTime = now + delta;
+				lastUpdateTime = now;
+				pending = true;			
+			} else {
+				lastUpdateTime = now;
+				synchronized (newClients) {
+					DoubleLinkedListNode node = newClients.getFirst();
+					while(node!=null) {
+						DoubleLinkedListNode next = node.next;
+						newClients.remove(node);
+						synchronized (clientsLocker) {
+							clients.addLast(node);
+						}					
+						node = next;
+					}
 				}
-				node = next;
-			}
-		}
-		
-		if (needStop) return;
-		synchronized (clientsLocker) {
-			for(DoubleLinkedListNode i = clients.getFirst(); i!=null; i = i.next) {
-				ClientInProcessor client = (ClientInProcessor) i.getPayload();
-				if (needStop) {
-					return;
+				
+				synchronized (clintsForRemove) {
+					DoubleLinkedListNode node = clintsForRemove.getFirst();
+					while(node!=null) {
+						DoubleLinkedListNode next = node.next;
+						clintsForRemove.remove(node);
+						synchronized (clientsLocker) {
+							clients.addLast(node);
+						}
+						node = next;
+					}
 				}
-				processClient(client);
+				
+				if (needStop) return;
+				synchronized (clientsLocker) {
+					for(DoubleLinkedListNode i = clients.getFirst(); i!=null; i = i.next) {
+						ClientInProcessor client = (ClientInProcessor) i.getPayload();
+						if (needStop) {
+							return;
+						}
+						processClient(client);
+					}
+				}
 			}
 		}
 	}

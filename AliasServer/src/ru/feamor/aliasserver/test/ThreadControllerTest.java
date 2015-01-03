@@ -1,12 +1,12 @@
 package ru.feamor.aliasserver.test;
 
+import java.util.Calendar;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
-import org.json.JSONObject;
 
 import ru.feamor.aliasserver.base.UpdateThreadController;
 import ru.feamor.aliasserver.utils.Log;
@@ -15,7 +15,7 @@ public class ThreadControllerTest extends BaseTest {
 	
 	UpdateThreadController controller;
 	
-	class TestExecuted implements UpdateThreadController.ThreadUpdated {
+	class TestExecuted implements UpdateThreadController.ThreadPendingUpdated {
 		
 		int count;
 		int minWait;
@@ -24,21 +24,38 @@ public class ThreadControllerTest extends BaseTest {
 		Random rand = new Random();
 		boolean hasError = false;
 		String errorMessage ="";
-
-		public TestExecuted(int count, int minWait, int maxWait, String name, boolean hasError) {
+		private boolean pending;
+		private long nextUpdateTime;
+		private int maxDelay;
+		
+		public TestExecuted(int count, int minWait, int maxWait, String name, boolean hasError, int maxDelay) {
 			super();
 			this.count = count;
 			this.minWait = minWait;
 			this.maxWait = maxWait;
 			this.name = name;
 			this.hasError = true;
+			this.maxDelay = maxDelay;
 			if (hasError) {
 				errorMessage = " (E) ";
 			}
-			Log.i("ThreadObject", "Create: <"+name+"> ("+count+"), sleep "+minWait+" - "+maxWait+" ms"+errorMessage);
+			int delay = rand.nextInt(maxDelay);
+			nextUpdateTime = Calendar.getInstance().getTimeInMillis()+delay;
+			pending = true;
+			Log.i("ThreadObject", "Create: <"+name+"> ("+count+"), prnding = "+delay+"sleep "+minWait+" - "+maxWait+" ms"+errorMessage);
 		}
 
 		DoubleLinkedListNode node;
+		
+		@Override
+		public long getExecuteTime() {
+			return nextUpdateTime;
+		}
+		
+		@Override
+		public boolean isPending() {
+			return pending;
+		}
 		
 		@Override
 		public void setUpdateNode(DoubleLinkedListNode node) {
@@ -59,6 +76,7 @@ public class ThreadControllerTest extends BaseTest {
 		
 		@Override
 		public void update() throws InterruptedException {
+			pending = false;
 			if (count <= 0) {
 				needStop = true;
 				if (hasError) {
@@ -126,7 +144,7 @@ public class ThreadControllerTest extends BaseTest {
 			String name = "Obj-"+i;
 			boolean hasError = false;
 			if (i%5 == 0) hasError = true;
-			TestExecuted exec = new TestExecuted(count, minWait, maxWait, name, hasError);
+			TestExecuted exec = new TestExecuted(count, minWait, maxWait, name, hasError, 10000);
 			controller.addUpdateObject(exec);
 		}
 	}
