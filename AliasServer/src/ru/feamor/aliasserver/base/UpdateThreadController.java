@@ -41,12 +41,12 @@ public class UpdateThreadController implements RunnableExecutor {
 	public static final long DEFAULT_WAKE_UPDATE_THREADS_NTERVAL= 7000;
 	public static final long DEFAULT_CHECK_THREADS_NTERVAL= 10000;
 	
-	private DoubleLinkedList activeQeue;
-	private DoubleLinkedList threads;
+	private volatile DoubleLinkedList activeQeue;
+	private volatile DoubleLinkedList threads;
 	
-	private DoubleLinkedList problems;
-	private DoubleLinkedList problemsTemp;
-	private Object problemsLocker = new Object();
+	private volatile DoubleLinkedList problems;
+	private volatile DoubleLinkedList problemsTemp;
+	private volatile Object problemsLocker = new Object();
 	
 	private java.util.Timer timerControl;
 
@@ -326,8 +326,12 @@ public class UpdateThreadController implements RunnableExecutor {
 										if (pendingObject.getExecuteTime() < minWaitPending) {
 											minWaitPending = pendingObject.getExecuteTime();
 										}
+										objectToUpdate = null;
 										node = node.next;
 									}
+								} else {
+									activeQeue.remove(node);
+									node = null;
 								}
 							} else {
 								activeQeue.remove(node);

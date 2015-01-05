@@ -26,23 +26,24 @@ public class ThreadControllerTest extends BaseTest {
 		String errorMessage ="";
 		private boolean pending;
 		private long nextUpdateTime;
-		private int maxDelay;
+		private int delay;
+		private float pendingProbatly;
 		
-		public TestExecuted(int count, int minWait, int maxWait, String name, boolean hasError, int maxDelay) {
+		public TestExecuted(int count, int minWait, int maxWait, String name, boolean hasError, int delay, float pendingProbatly) {
 			super();
 			this.count = count;
 			this.minWait = minWait;
 			this.maxWait = maxWait;
 			this.name = name;
 			this.hasError = true;
-			this.maxDelay = maxDelay;
 			if (hasError) {
 				errorMessage = " (E) ";
 			}
-			int delay = rand.nextInt(maxDelay);
+			this.pendingProbatly = pendingProbatly;
 			nextUpdateTime = Calendar.getInstance().getTimeInMillis()+delay;
+			this.delay = delay;
 			pending = true;
-			Log.i("ThreadObject", "Create: <"+name+"> ("+count+"), prnding = "+delay+"sleep "+minWait+" - "+maxWait+" ms"+errorMessage);
+			Log.i("ThreadObject", "Create: <"+name+"> ("+count+"), prnding = "+delay+", sleep "+minWait+" - "+maxWait+" ms"+errorMessage);
 		}
 
 		DoubleLinkedListNode node;
@@ -76,7 +77,15 @@ public class ThreadControllerTest extends BaseTest {
 		
 		@Override
 		public void update() throws InterruptedException {
-			pending = false;
+			float prob = rand.nextFloat();
+			if (prob >= pendingProbatly) {
+				pending = true;
+				nextUpdateTime = Calendar.getInstance().getTimeInMillis() + delay;
+				Log.i("ThreadObject", "Executed <"+name+"> ("+count+"), prob = "+prob+" - "+pendingProbatly+", wait "+delay);
+			} else {
+				pending = false;
+				Log.i("ThreadObject", "Executed <"+name+"> ("+count+"), prob = "+prob+" - "+pendingProbatly+", no wait");
+			}
 			if (count <= 0) {
 				needStop = true;
 				if (hasError) {
@@ -115,7 +124,7 @@ public class ThreadControllerTest extends BaseTest {
 						long started = timers.right;
 						timeMessage = String.format("Timeout: %d, started at: %d, finish at %d", now-started, now, started);
 					}
-					Log.e("ThreadObject", "ERROR: <"+name+">Object updated too long"+timeMessage );
+					Log.e("ThreadObject", "ERROR: <"+name+">Object updated too long "+timeMessage );
 					break;
 				case UpdateThreadController.ExecutionProblems.UPDATE_EXEPTION:
 					Log.e("ThreadObject", "ERROR <"+name+"> in update: Exception", (Throwable)problem);
@@ -137,14 +146,15 @@ public class ThreadControllerTest extends BaseTest {
 		
 	void fillData() {
 		Random r = new Random();
-		for (int i = 0; i < 21; i++) {
-			int minWait = r.nextInt(9000);
-			int maxWait = r.nextInt(60000);
-			int count = r.nextInt(30)+3;
-			String name = "Obj-"+i;
+		for (int i = 0; i < 5; i++) {
+			int minWait = r.nextInt(1000);
+			int maxWait = r.nextInt(5000)+1000;
+			int count = r.nextInt(5)+3;
+			int pendingTime = r.nextInt(5000) + 500;
+			String name = "Obj"+i;
 			boolean hasError = false;
-			if (i%5 == 0) hasError = true;
-			TestExecuted exec = new TestExecuted(count, minWait, maxWait, name, hasError, 10000);
+//			if (i%5 == 0) hasError = true;
+			TestExecuted exec = new TestExecuted(count, minWait, maxWait, name, hasError, pendingTime, 0.2f);
 			controller.addUpdateObject(exec);
 		}
 	}
@@ -155,7 +165,7 @@ public class ThreadControllerTest extends BaseTest {
 			Log.i("Press any key to stop");
 			System.console().readLine();
 		} else {
-			int timeout = 2 * 60 * 1000; 
+			int timeout = 40 * 1000; 
 			Log.i("Can`t get Console, wait "+(timeout / 1000)+" sec");
 			try {
 				Thread.sleep(timeout);
@@ -181,10 +191,11 @@ public class ThreadControllerTest extends BaseTest {
 		controller = new UpdateThreadController("test");
 		Log.i("Controller configure");
 		
-		controller.setConfig_maxUpdateTime(10000);
+		controller.setConfig_maxUpdateTime(10 * 1000);
 		controller.setConfig_timerInterval(500);
 		controller.setConfig_checkThreadsInterval(2000);
 		controller.setConfig_timerInterval(2000);
+		controller.setConfig_updateThreadsCount(10);
 		
 		Log.i("Start controller");
 		controller.startController();
