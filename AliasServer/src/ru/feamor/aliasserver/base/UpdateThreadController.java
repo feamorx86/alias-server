@@ -346,7 +346,6 @@ public class UpdateThreadController implements RunnableExecutor {
 							try {
 								updateSemaphore.drainPermits();
 								updateSemaphore.tryAcquire(delta, TimeUnit.MILLISECONDS);
-								вот тут нужно проверить что да как "!!
 							} catch(InterruptedException iex) {
 								needStop = true;
 							}
