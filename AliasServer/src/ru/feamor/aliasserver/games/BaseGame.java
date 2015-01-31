@@ -11,8 +11,8 @@ import ru.feamor.aliasserver.base.UpdateThreadController.ThreadUpdated;
 import ru.feamor.aliasserver.commands.GameCommand;
 import ru.feamor.aliasserver.components.GameManager;
 import ru.feamor.aliasserver.components.NettyManager;
-import ru.feamor.aliasserver.game.GameClient;
 import ru.feamor.aliasserver.game.GameType;
+import ru.feamor.aliasserver.users.GameClient;
 
 public abstract class BaseGame implements ThreadUpdated {
 	/***

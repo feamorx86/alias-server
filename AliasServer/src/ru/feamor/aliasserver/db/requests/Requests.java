@@ -28,7 +28,7 @@ public class Requests {
 	
 	public static class SystemCommands {
 		
-		public static class GetAllUserGamesWithStatus{
+		public static class GetAllUserGamesWithStatus {
 			public static final int ID = 20;
 			public static final String SQL = "SELECT game_type.id, game_type.NAME, game_type.description, game_type.icon_url "
 					+ "FROM game_type "
@@ -42,6 +42,19 @@ public class Requests {
 			public static final int rs_game_type_name = 2;
 			public static final int rs_game_type_descrition = 3;
 			public static final int rs_game_type_icon_url = 4;
+		}
+		
+		public static class CheckcGameAvalableForUser {
+			public static final int ID = 30;
+			public static final String SQL = "SELECT user_game_types.id, user_game_types.status "
+					+ "FROM user_game_types"
+					+ "WHERE user_game_types.fk_user = ? "
+					+ "AND user_game_types.fk_game_type = ?;";
+			public static final int rq_user_id = 1;
+			public static final int rq_game_type_id = 2;
+			
+			public static final int rs_user_game_type_id = 1;
+			public static final int rs_user_game_type_status = 2;
 		}
 		
 		static class TODO_GetAllUserGamesWithStatus_MD5 {

@@ -3,7 +3,7 @@ package ru.feamor.aliasserver.game;
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 
 import ru.feamor.aliasserver.base.UpdateThreadController.ThreadUpdated;
-import ru.feamor.aliasserver.game.UsersPool.UserQueue;
+import ru.feamor.aliasserver.users.UsersPool.UserQueue;
 
 public class GameConnector implements ThreadUpdated {
 	

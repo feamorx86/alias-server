@@ -5,7 +5,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import ru.feamor.aliasserver.game.UsersPool.SimpleCoutGameConnector;
+import ru.feamor.aliasserver.users.UsersPool.SimpleCoutGameConnector;
 import ru.feamor.aliasserver.utils.Log;
 
 public class GameConnectorFactory {		

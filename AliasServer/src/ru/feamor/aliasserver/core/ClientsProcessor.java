@@ -1,6 +1,10 @@
 package ru.feamor.aliasserver.core;
 
+import gnu.trove.iterator.TLongObjectIterator;
+import gnu.trove.map.hash.TLongObjectHashMap;
+
 import java.util.Calendar;
+import java.util.Iterator;
 
 import org.apache.jcs.utils.struct.DoubleLinkedList;
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
@@ -11,7 +15,7 @@ import ru.feamor.aliasserver.base.UpdateThreadController;
 public abstract class ClientsProcessor implements UpdateThreadController.ThreadPendingUpdated{
 	public static final long DEFAULT_MIN_UPDATE_TIME = 200;
 	
-	protected DoubleLinkedList clients = new DoubleLinkedList();
+	protected TLongObjectHashMap<ClientInProcessor> clients = new TLongObjectHashMap<ClientInProcessor>();
 	protected DoubleLinkedList newClients = new DoubleLinkedList();
 	protected DoubleLinkedList clintsForRemove = new DoubleLinkedList();
 	
@@ -20,11 +24,27 @@ public abstract class ClientsProcessor implements UpdateThreadController.ThreadP
 	protected boolean needStop = false;
 	private long lastUpdateTime;
 	
-	public void addClient(ClientInProcessor client) {
+	public void addNewClient(ClientInProcessor client) {
 		synchronized (newClients) {
 			newClients.addLast(client.getProcessorNode());
 		}
 		client.onAdded();
+	}
+	
+	public ClientInProcessor getClientById(long clientId) {
+		return clients.get(clientId);
+	}
+	
+	public void addResuedClient(ClientInProcessor client) {
+		ClientInProcessor oldClient = clients.get(client.getGameClient().getPlayer().getId());
+		if (oldClient!=null) {
+			removeClient(oldClient);
+		}
+		
+		synchronized (newClients) {
+			newClients.addLast(client.getProcessorNode());
+		}
+		client.onResumed();
 	}
 	
 	public void removeClient(ClientInProcessor client) {
@@ -59,52 +79,61 @@ public abstract class ClientsProcessor implements UpdateThreadController.ThreadP
 		return nextUpdateTime;
 	}
 	
+	protected boolean checkIsItTimeToUpdate() {
+		boolean needUpdate = true;
+		
+		pending = false;
+		long now = Calendar.getInstance().getTimeInMillis();
+		long delta = now - lastUpdateTime;
+		lastUpdateTime = now;
+		
+		if (delta < getMinUpdateTime()) {
+			nextUpdateTime = now + delta;
+			pending = true;
+			needUpdate = false;
+		}
+		
+		return needUpdate;
+	}
+	
 	@Override
 	public void update() throws InterruptedException {
-		if (!needStop) {
-			pending = false;
-			long now = Calendar.getInstance().getTimeInMillis();
-			long delta = now - lastUpdateTime;
+		if (!needStop && checkIsItTimeToUpdate()) {
+			synchronized (clintsForRemove) {
+				DoubleLinkedListNode node = clintsForRemove.getFirst();
+				while(node!=null) {
+					DoubleLinkedListNode next = node.next;
+					clintsForRemove.remove(node);
+					ClientInProcessor client = (ClientInProcessor) node.getPayload();
+					synchronized (clientsLocker) {
+						clients.remove(client.getGameClient().getPlayer().getId());
+					}
+					node = next;
+				}
+			}
 			
-			if (delta < getMinUpdateTime()) {
-				nextUpdateTime = now + delta;
-				lastUpdateTime = now;
-				pending = true;			
-			} else {
-				lastUpdateTime = now;
-				synchronized (newClients) {
-					DoubleLinkedListNode node = newClients.getFirst();
-					while(node!=null) {
-						DoubleLinkedListNode next = node.next;
-						newClients.remove(node);
-						synchronized (clientsLocker) {
-							clients.addLast(node);
-						}					
-						node = next;
-					}
+			synchronized (newClients) {
+				DoubleLinkedListNode node = newClients.getFirst();
+				while(node!=null) {
+					DoubleLinkedListNode next = node.next;
+					newClients.remove(node);
+					ClientInProcessor client = (ClientInProcessor) node.getPayload();
+					synchronized (clientsLocker) {
+						clients.put(client.getGameClient().getPlayer().getId(), client);
+					}					
+					node = next;
 				}
-				
-				synchronized (clintsForRemove) {
-					DoubleLinkedListNode node = clintsForRemove.getFirst();
-					while(node!=null) {
-						DoubleLinkedListNode next = node.next;
-						clintsForRemove.remove(node);
-						synchronized (clientsLocker) {
-							clients.addLast(node);
-						}
-						node = next;
+			}
+							
+			if (needStop) return;
+			synchronized (clientsLocker) {
+				for ( TLongObjectIterator<ClientInProcessor> it = clients.iterator(); it.hasNext(); ) {
+					it.advance();
+					ClientInProcessor client = clients.iterator().value();
+					if (needStop) {
+						return;
 					}
-				}
-				
-				if (needStop) return;
-				synchronized (clientsLocker) {
-					for(DoubleLinkedListNode i = clients.getFirst(); i!=null; i = i.next) {
-						ClientInProcessor client = (ClientInProcessor) i.getPayload();
-						if (needStop) {
-							return;
-						}
-						processClient(client);
-					}
+					processClient(client);
 				}
 			}
 		}

@@ -3,9 +3,9 @@ package ru.feamor.aliasserver.game.assignment;
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 
 import ru.feamor.aliasserver.components.TimeManager;
-import ru.feamor.aliasserver.game.GameClient;
 import ru.feamor.aliasserver.game.GamePlayer;
 import ru.feamor.aliasserver.game.GameTags;
+import ru.feamor.aliasserver.users.GameClient;
 
 public class PlayerInLevelGroup {
 	private GameClient player;

@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import ru.feamor.aliasserver.config.ConfigurationFactory;
 import ru.feamor.aliasserver.db.requests.AuthorizationParser;
+import ru.feamor.aliasserver.db.requests.CheckGameAvailableForUserRequestParser;
 import ru.feamor.aliasserver.db.requests.GetGamesRequestParser;
 import ru.feamor.aliasserver.db.requests.Requests;
 import ru.feamor.aliasserver.utils.Log;
@@ -32,6 +33,7 @@ public class DBCommandFactory {
 		}
 		parsers.put(Requests.Authorization.EmailAndPassword.ID, new AuthorizationParser());	
 		parsers.put(Requests.SystemCommands.GetAllUserGamesWithStatus.ID, new GetGamesRequestParser());
+		parsers.put(Requests.SystemCommands.CheckcGameAvalableForUser.ID, new CheckGameAvailableForUserRequestParser());
 		Log.i(DBCommandFactory.class, "Configuration complete");
 	}
 	

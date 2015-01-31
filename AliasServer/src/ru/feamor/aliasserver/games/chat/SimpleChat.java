@@ -10,8 +10,8 @@ import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 import ru.feamor.aliasserver.commands.CommandTypes;
 import ru.feamor.aliasserver.commands.GameCommand;
 import ru.feamor.aliasserver.components.NettyManager;
-import ru.feamor.aliasserver.game.GameClient;
 import ru.feamor.aliasserver.games.BaseGame;
+import ru.feamor.aliasserver.users.GameClient;
 import ru.feamor.aliasserver.utils.TextUtils;
 
 public class SimpleChat extends BaseGame {
