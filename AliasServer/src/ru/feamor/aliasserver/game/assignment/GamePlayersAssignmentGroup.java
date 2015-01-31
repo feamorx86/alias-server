@@ -5,9 +5,9 @@ import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 import org.json.JSONObject;
 
 import ru.feamor.aliasserver.components.TimeManager;
-import ru.feamor.aliasserver.game.GameClient;
 import ru.feamor.aliasserver.game.GamePlayer;
 import ru.feamor.aliasserver.game.GameTags;
+import ru.feamor.aliasserver.users.GameClient;
 import ru.feamor.aliasserver.utils.Log;
 
 public class GamePlayersAssignmentGroup {

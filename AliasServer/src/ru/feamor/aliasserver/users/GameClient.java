@@ -1,4 +1,4 @@
-package ru.feamor.aliasserver.game;
+package ru.feamor.aliasserver.users;
 
 import io.netty.buffer.ByteBuf;
 
@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import ru.feamor.aliasserver.commands.GameCommand;
 import ru.feamor.aliasserver.components.NettyManager;
+import ru.feamor.aliasserver.game.GamePlayer;
 import ru.feamor.aliasserver.netty.NettyClient;
 
 public class GameClient {

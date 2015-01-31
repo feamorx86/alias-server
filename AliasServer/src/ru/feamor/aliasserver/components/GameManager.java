@@ -1,43 +1,26 @@
 package ru.feamor.aliasserver.components;
 
-import java.lang.ref.Reference;
-import java.util.ArrayList;
-import java.util.Calendar;
-
 import gnu.trove.map.hash.TIntObjectHashMap;
+
+import java.util.Calendar;
 
 import org.apache.jcs.utils.struct.DoubleLinkedList;
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
-import org.json.JSONObject;
 
-import ru.feamor.aliasserver.base.DataObject;
 import ru.feamor.aliasserver.base.RunnableExecutor;
 import ru.feamor.aliasserver.base.UpdateThreadController;
-import ru.feamor.aliasserver.base.WithRequestId;
-import ru.feamor.aliasserver.commands.CommandTypes;
-import ru.feamor.aliasserver.commands.CommandTypes.SYSTEM;
-import ru.feamor.aliasserver.commands.GameCommand;
-import ru.feamor.aliasserver.commands.GameCommandHolder;
+import ru.feamor.aliasserver.base.UpdateThreadController.ThreadUpdated;
 import ru.feamor.aliasserver.commands.SystemCommandsProcessor;
 import ru.feamor.aliasserver.core.ClientInProcessor;
-import ru.feamor.aliasserver.core.ClientsProcessor;
 import ru.feamor.aliasserver.core.Component;
-import ru.feamor.aliasserver.db.DBRequest;
-import ru.feamor.aliasserver.db.RunWithParamsDBRequest;
-import ru.feamor.aliasserver.db.DBRequest.RequestExecutor;
-import ru.feamor.aliasserver.db.requests.Requests;
-import ru.feamor.aliasserver.game.GameClient;
-import ru.feamor.aliasserver.game.GameTags;
-import ru.feamor.aliasserver.game.UsersPool;
-import ru.feamor.aliasserver.game.models.GameTypeModel;
+import ru.feamor.aliasserver.game.GameConnectorFactory;
 import ru.feamor.aliasserver.game.types.GameTypeCollector;
 import ru.feamor.aliasserver.games.Authorizator;
 import ru.feamor.aliasserver.games.BaseGame;
-import ru.feamor.aliasserver.games.Authorizator.TypeEmailPassword;
 import ru.feamor.aliasserver.netty.NettyClient;
+import ru.feamor.aliasserver.users.GameClient;
+import ru.feamor.aliasserver.users.UsersPool;
 import ru.feamor.aliasserver.utils.Log;
-import ru.feamor.aliasserver.utils.RunWithParams;
-import ru.feamor.aliasserver.utils.TextUtils;
 
 public class GameManager extends Component  {
 	
@@ -46,13 +29,13 @@ public class GameManager extends Component  {
 	private GameTypeCollector typeController;	
 	private TIntObjectHashMap<BaseGame> activeGames;
 	private Authorizator authorizator;
-	private GamesFactory gamesFactory = new GamesFactory();
+	private GamesFactory gamesFactory;
+	private GameConnectorFactory connectorFactory;
 	private UpdateThreadController GameLogicExecutor;
 	private Thread managerThread;	
 	private int minUpdateInterval = MIN_UPDATE_INTERVAL;
 	private long lastUpdateTime = 0;
 	private UsersPool usersPool;
-	private SystemCommandsProcessor systemCommandsProcessor = new SystemCommandsProcessor();
 	
 	public GameManager() {
 	
@@ -62,10 +45,15 @@ public class GameManager extends Component  {
 		return (GameManager)Components.gameManager.compenent;
 	}
 	
+	public static void runAsGameLogic(ThreadUpdated executed) {
+		get().getThreadController().addUpdateObject(executed);
+	}
+	
 	@Override
 	public void create() {
 		super.create();
 		gamesFactory = new GamesFactory();
+		connectorFactory = new GameConnectorFactory();
 		typeController = new GameTypeCollector();
 		activeGames = new TIntObjectHashMap<BaseGame>();
 		GameLogicExecutor = new UpdateThreadController("GameLogic");
@@ -81,7 +69,7 @@ public class GameManager extends Component  {
 		managerThread = new Thread(updateRunnable, "GameManagerThread");
 		managerThread.start();
 		
-		GameLogicExecutor.addUpdateObject(systemCommandsProcessor);
+//		GameLogicExecutor.addUpdateObject(systemCommandsProcessor);
 	}
 	
 	private DoubleLinkedList runInUpdate = new DoubleLinkedList();
@@ -174,10 +162,14 @@ public class GameManager extends Component  {
 				userInPool.addedAt = Calendar.getInstance().getTimeInMillis();
 				userInPool.processprNode = new DoubleLinkedListNode(userInPool);
 				userInPool.lastActivity = userInPool.addedAt;
-				systemCommandsProcessor.addClient(userInPool);
+				usersPool.newUser(client);
 			}
 			authorizator.getAuthorizedPlayers().removeAll();
 		}
+	}
+	
+	public UsersPool getUsersPool() {
+		return usersPool;
 	}
 	
 	
@@ -206,6 +198,11 @@ public class GameManager extends Component  {
 		public void onAdded() {
 			
 		}
+		
+		@Override
+		public void onResumed() {
+			
+		}
 
 		@Override
 		public void onRemoved() {
@@ -222,41 +219,6 @@ public class GameManager extends Component  {
 			state = newState;
 		}
 	}
-	
-//	public void updateUserPoll() {
-//		//Важно! чтобы колекция не изменялась одновременно с перебором
-//		
-//		for (DoubleLinkedListNode i = playersPoll.getFirst(); i!=null; i=i.next) {
-//			ClientInUsersPool userInPool = (ClientInUsersPool) i.getPayload();
-//			if (userInPool.isStopped) {
-//				userInPool.clinet.getConnection().close();
-//				DoubleLinkedListNode next = i.next;
-//				playersPoll.remove(i);
-//				i = next;
-//			} else {
-//				if (userInPool.inGame) {
-//					//game should check client
-//				} else {
-//					//test on new SYSTEM commands
-//					GameCommand command = userInPool.clinet.getConnection().getFirstReceivedCommand(CommandTypes.SYSTEM.TYPE);
-//					if (command!=null) {
-//						userInPool.lastActivity = Calendar.getInstance().getTimeInMillis();
-//						processClientCommand(userInPool, command);
-//					} else {
-//						//check client timeout
-//						long now = Calendar.getInstance().getTimeInMillis();
-//						if (now - userInPool.lastActivity > 60 * 1000) {
-//							userInPool.isStopped = true;
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
-		
-//	private void processClientCommand(ClientInUsersPool userInPool, GameCommand command) {
-//		
-//	}
 
 	public GameTypeCollector getTypeController() {
 		return typeController;
@@ -287,20 +249,13 @@ public class GameManager extends Component  {
 		}		
 		return result;
 	}
-
-	public BaseGame startGame(int typeId, Object params) {
-		BaseGame game = gamesFactory.createGame(typeId, params);
-		if (game != null) {
-			int gameId = generateGameId();
-			game.setId(gameId);
-			activeGames.put(gameId, game);
-			GameLogicExecutor.addUpdateObject(game);
-		}
-		return game;
-	}
 	
 	public GamesFactory getGamesFactory() {
 		return gamesFactory;
+	}
+	
+	public GameConnectorFactory getConnectorFactory() {
+		return connectorFactory;
 	}
 	
 	public UpdateThreadController getThreadController() {

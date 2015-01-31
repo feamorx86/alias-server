@@ -150,7 +150,7 @@ public class ThreadControllerTest extends BaseTest {
 			int minWait = r.nextInt(1000);
 			int maxWait = r.nextInt(5000)+1000;
 			int count = r.nextInt(5)+3;
-			int pendingTime = r.nextInt(5000) + 500;
+			int pendingTime = r.nextInt(10000) + 7000;
 			String name = "Obj"+i;
 			boolean hasError = false;
 //			if (i%5 == 0) hasError = true;

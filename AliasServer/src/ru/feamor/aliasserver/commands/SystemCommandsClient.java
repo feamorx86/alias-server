@@ -7,7 +7,7 @@ import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 import ru.feamor.aliasserver.base.DataObject;
 import ru.feamor.aliasserver.base.WithRequestId;
 import ru.feamor.aliasserver.core.ClientInProcessor;
-import ru.feamor.aliasserver.game.GameClient;
+import ru.feamor.aliasserver.users.GameClient;
 
 public class SystemCommandsClient implements ClientInProcessor, WithRequestId {
 
@@ -61,6 +61,12 @@ public class SystemCommandsClient implements ClientInProcessor, WithRequestId {
 	
 	@Override
 	public void onRemoved() {
+		
+	}
+	
+	@Override
+	public void onResumed() {
+		// TODO Auto-generated method stub
 		
 	}
 	
