@@ -1,8 +1,9 @@
-package ru.feamor.aliasserver.game;
+package ru.feamor.aliasserver.game.connectors;
 
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 
 import ru.feamor.aliasserver.base.UpdateThreadController.ThreadUpdated;
+import ru.feamor.aliasserver.game.GameType;
 import ru.feamor.aliasserver.users.UsersPool.UserQueue;
 
 public class GameConnector implements ThreadUpdated {

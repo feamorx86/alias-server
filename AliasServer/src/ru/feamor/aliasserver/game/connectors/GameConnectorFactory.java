@@ -1,4 +1,4 @@
-package ru.feamor.aliasserver.game;
+package ru.feamor.aliasserver.game.connectors;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 

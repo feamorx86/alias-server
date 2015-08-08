@@ -3,7 +3,6 @@ package ru.feamor.aliasserver.users;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
-import java.sql.Time;
 import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -12,26 +11,23 @@ import org.apache.jcs.utils.struct.DoubleLinkedList;
 import org.apache.jcs.utils.struct.DoubleLinkedListNode;
 import org.json.JSONObject;
 
-import ru.feamor.aliasserver.base.DataObject;
-import ru.feamor.aliasserver.base.ObjectCache;
 import ru.feamor.aliasserver.base.UpdateThreadController;
-import ru.feamor.aliasserver.commands.CommandTypes;
 import ru.feamor.aliasserver.commands.CommandTypes.SYSTEM;
-import ru.feamor.aliasserver.commands.SystemCommandsProcessor.States;
-import ru.feamor.aliasserver.commands.SystemCommandsProcessor.TypeGetGamesFor;
-import ru.feamor.aliasserver.commands.SystemCommandsProcessor.TypeUserCanPlayGame;
 import ru.feamor.aliasserver.commands.GameCommand;
 import ru.feamor.aliasserver.commands.SystemCommandsClient;
 import ru.feamor.aliasserver.commands.SystemCommandsProcessor;
+import ru.feamor.aliasserver.commands.SystemCommandsProcessor.TypeGetGamesFor;
+import ru.feamor.aliasserver.commands.SystemCommandsProcessor.TypeUserCanPlayGame;
 import ru.feamor.aliasserver.components.DBManager;
 import ru.feamor.aliasserver.components.GameManager;
 import ru.feamor.aliasserver.db.DBRequest;
 import ru.feamor.aliasserver.db.RunWithParamsDBRequest;
 import ru.feamor.aliasserver.db.requests.Requests;
-import ru.feamor.aliasserver.game.GameConnector;
-import ru.feamor.aliasserver.game.GameConnectorFactory;
 import ru.feamor.aliasserver.game.GameTags;
 import ru.feamor.aliasserver.game.GameType;
+import ru.feamor.aliasserver.game.connectors.ConnectorsLoader;
+import ru.feamor.aliasserver.game.connectors.GameConnector;
+import ru.feamor.aliasserver.game.connectors.GameConnectorFactory;
 import ru.feamor.aliasserver.games.BaseGame;
 import ru.feamor.aliasserver.utils.RunWithParams;
 import ru.feamor.aliasserver.utils.TextUtils;
@@ -44,9 +40,7 @@ public class UsersPool {
 	private TLongObjectHashMap<UserInPool> allClients = new TLongObjectHashMap<UserInPool>();
 	
 	private TIntObjectHashMap<UserQueue> activeTypes;
-	private DoubleLinkedList newUsers, newUsersTemp;
-	private Object newUsersLocker;
-	
+		
 	private DoubleLinkedList newGameRequests, newGameRequestsTemp;
 	private Object newGameRequestsLocker;
 	
@@ -56,6 +50,10 @@ public class UsersPool {
 //	private UpdateThreadController connectorsThreads;
 	private ConnectorsLoader connectorsLoader;
 	private GameConnectorFactory connectorFactory;
+	
+	private DoubleLinkedList newUsers;
+	private DoubleLinkedList newUsersTemp;
+	private Object newUsersLocker;
 	
 	public UsersPool() {
 		activeTypes = new TIntObjectHashMap<>();
@@ -72,130 +70,7 @@ public class UsersPool {
 //		connectorsThreads = new UpdateThreadController("GameConnectors");
 	}
 	
-	public static class ConnectorsLoader implements UpdateThreadController.ThreadPendingUpdated {
-
-		private DoubleLinkedList newConnectors, newConnectorsTemp;
-		private Object newConnectorsLocker;
-
-		
-		private DoubleLinkedListNode node;
-		private boolean needStop;
-		private boolean pending;
-		private long lastUpdateTime;
-		private long minUpdateTime = 300;
-		private long nextUpdateTime = 0;
-				
-		public ConnectorsLoader() {
-			lastUpdateTime = Calendar.getInstance().getTimeInMillis();
-			pending = false;
-			needStop = false;
-		}
-		
-		public void loadGameType(UserQueue userQueue) {
-			synchronized (newConnectorsLocker) {
-				newConnectors.addFirst(new DoubleLinkedListNode(userQueue));
-			}
-		}
-		
-		@Override
-		public void setUpdateNode(DoubleLinkedListNode node) {
-			this.node = node;
-		}
-
-		@Override
-		public DoubleLinkedListNode getUpdateNode() {
-			return node;
-		}
-
-		@Override
-		public boolean needStopUpdate() {
-			return needStop;
-		}
-		
-		private boolean checkIsItTimeToUpdate() {
-			boolean needUpdate = true;
-			
-			pending = false;
-			long now = Calendar.getInstance().getTimeInMillis();
-			long delta = now - lastUpdateTime;
-			lastUpdateTime = now;
-			
-			if (delta < minUpdateTime) {
-				nextUpdateTime = now + delta;
-				pending = true;
-				needUpdate = false;
-			}
-			
-			return needUpdate;
-		}
-
-		@Override
-		public void update() throws InterruptedException {
-			if (!needStop && checkIsItTimeToUpdate()) {
-				checkNewRequests();
-			}
-		}
-
-		private void checkNewRequests() {
-			synchronized (newConnectorsLocker) {
-				if (newConnectors.size() > 0) {
-					newConnectorsTemp.removeAll();
-					DoubleLinkedList temp = newConnectors;
-					newConnectors = newConnectorsTemp;
-					newConnectorsTemp = temp;
-				}
-			}
-			
-			for(DoubleLinkedListNode i = newConnectorsTemp.getFirst(); i!=null; i = i.next) {
-				
-				- вот тут нестыковочка выходит - нужно перепроверить чтобы везде, в подобных местах был Temp.!!!
-				- дописать запроса данных
-				- создание коннектора 
-				- добавление и включение коннектора
-				- тест для коннектора
-				
-				UserQueue userQueue = (UserQueue) i.getPayload();
-				RequestedGameConnector requestedGameConnector = new RequestedGameConnector();  
-				DBRequest request = DBManager.get().startRequest();
-				request.setRequestParser(DBManager.commandFactory().getRequestParser(Requests.SystemCommands.CheckcGameAvalableForUser.ID));
-				request.putParameter(TypeUserCanPlayGame.rq_pos_user_id, userId);
-				request.putParameter(TypeUserCanPlayGame.rq_pos_game_type_id, selectedGameId);
-				request.putParameter(TypeGetGamesFor.rq_request_id_position, client.nextRequestId());
-				request.setSender(requestedGameConnector);
-				request.setOnComplete(db_getGameTypeInfo);//TODO: add ability to make it possible to cancel if timeout.
-				request.setOnExecuted(getExecutor());
-				DBManager.get().executeAsync(request);					
-			}
-		}
-
-		@Override
-		public void onProblem(Integer problemType, Object problem) {
-			
-		}
-
-		@Override
-		public void wasError() {
-			
-		}
-
-		@Override
-		public boolean isPending() {
-			return pending;
-		}
-
-		@Override
-		public long getExecuteTime() {
-			return nextUpdateTime;
-		}
-		
-		private RunWithParams<DBRequest> db_getGameTypeInfo = new RunWithParamsDBRequest() {
-			@Override
-			public void run() {
-				RequestedGameConnector request = (RequestedGameConnector) param.getSender();
-				
-			}
-		};
-	}
+	
 	
 	public static class RequestedGameConnector {
 		public int gameTypeId;
@@ -211,6 +86,8 @@ public class UsersPool {
 	}
 		
 	public void update() {
+		смотреть где чего и как вызывается update, добавить его выполнение, смотреть что дальше происходит с пользователем после запроса игры
+		
 		updateLoadingConnectors();
 		updateNewUsers();		
 		updateConnectors();
@@ -353,61 +230,7 @@ public class UsersPool {
 		
 	}
 
-	public static class SimpleCoutGameConnector extends GameConnector {
-		public static final int STATE_NEW = 0;
-		public static final int STATE_WAIT_USERS = 1;
-		
-		private int usersForGame;
-		private int state;
-		
-		public SimpleCoutGameConnector(GameType gameType, UserQueue queue) {
-			super(gameType, queue);
-			state = STATE_NEW;
-		}
-		
-		@Override
-		public void update() throws InterruptedException {
-			super.update();
-			switch (state) {
-				case STATE_NEW:
-					firstStart();
-					break;
-				case STATE_WAIT_USERS:
-					checkUsers();
-					break;
-			}
-		}
-				
-		private void checkUsers() {
-			DoubleLinkedList players = new DoubleLinkedList();
-			synchronized (queue.users) {
-				for (int i=0; i<usersForGame; i++) {
-					DoubleLinkedListNode node = queue.users.getFirst();  
-					queue.users.remove(node);
-					players.addLast(node);
-				}
-			}
-			
-			if (queue.users.size() >= usersForGame) {
-				BaseGame game = ((GameType.GameTypeWithFixedPlayersCount)gameType).createGame(players);
-				
-//				Добавить поведение сервера и клиента на ситуацию - Ошибка создания коннектора \ ошибка создания игры. 
-//				добавить проверку на возможность пользователя играть в игру заданного типа.
-//				Добавить для пользователя "подключение к игре отколонено"
-			}
-		}
-
-		private void firstStart() {
-			if (gameType instanceof GameType.GameTypeWithFixedPlayersCount) {
-				usersForGame = ((GameType.GameTypeWithFixedPlayersCount) gameType).getPlayersCount();
-				
-				if (usersForGame <= 0) throw new RuntimeException("users For game can`t be <= 0!");
-				state = STATE_WAIT_USERS;
-			} else {
-				throw new RuntimeException("Incorrect Game type, Game type must be inherior of GameTypeWithFixedPlayersCount");
-			}
-		}
-	}
+	
 	
 	public static class GameRequest {
 		public int gameTypeId;
@@ -447,6 +270,10 @@ public class UsersPool {
 				users.addLast(node);
 			}
 			
+		}
+		
+		public DoubleLinkedList getUsers() {
+			return users;
 		}
 		
 	}
