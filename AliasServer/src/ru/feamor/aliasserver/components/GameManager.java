@@ -13,7 +13,7 @@ import ru.feamor.aliasserver.base.UpdateThreadController.ThreadUpdated;
 import ru.feamor.aliasserver.commands.SystemCommandsProcessor;
 import ru.feamor.aliasserver.core.ClientInProcessor;
 import ru.feamor.aliasserver.core.Component;
-import ru.feamor.aliasserver.game.GameConnectorFactory;
+import ru.feamor.aliasserver.game.connectors.GameConnectorFactory;
 import ru.feamor.aliasserver.game.types.GameTypeCollector;
 import ru.feamor.aliasserver.games.Authorizator;
 import ru.feamor.aliasserver.games.BaseGame;

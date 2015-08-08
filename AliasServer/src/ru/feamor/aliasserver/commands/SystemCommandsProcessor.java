@@ -227,7 +227,7 @@ public class SystemCommandsProcessor extends ClientsProcessor {
 				case TypeUserCanPlayGame.RESULT_SUCCESS:
 					{
 						int gameId = (Integer)param.getParameter(TypeUserCanPlayGame.rq_pos_game_type_id);
-						GameManager.get().getUsersPool().startGame(client, gameId);
+						GameManager.get().getUsersPool().newGameRequest(client, gameId);
 						client.setState(States.WAIT_CREATE_GAME);
 					}
 					break;
